@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מחירון בסיס – חיפוש מוצרים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --surface2: #f8f9fc;
+    --border: #e2e6f0;
+    --text: #1a1d2e;
+    --text-muted: #6b7280;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --orange: #d97706;
+    --orange-light: #fef3c7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
+    padding: 28px 32px 24px;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(37,99,235,0.35);
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .logo-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .logo-text p {
+    font-size: 12px;
+    opacity: 0.75;
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  .search-bar {
+    flex: 1;
+    min-width: 260px;
+    position: relative;
+  }
+
+  .search-bar input {
+    width: 100%;
+    padding: 12px 48px 12px 16px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: background 0.2s;
+    backdrop-filter: blur(10px);
+  }
+
+  .search-bar input::placeholder { color: rgba(255,255,255,0.6); }
+  .search-bar input:focus { background: rgba(255,255,255,0.28); }
+
+  .search-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    font-size: 17px;
+    pointer-events: none;
+  }
+
+  .clear-btn {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .clear-btn:hover { background: rgba(255,255,255,0.35); }
+  .clear-btn.visible { display: flex; }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .stat-pill {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+  }
+
+  .stat-pill span { font-weight: 700; }
+
+  /* FILTERS BAR */
+  .filters-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    position: sticky;
+    top: 102px;
+    z-index: 90;
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  /* DISCOUNT responsive */
+  @media (max-width: 768px) {
+    .discount-bar { top: 140px; padding: 8px 16px; }
+  }
+
+  .filters-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+  }
+
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+
+  .chip-thermolock { }
+  .chip-thermolock.active { background: #1e3a8a; border-color: #1e3a8a; }
+  .chip-concrete { }
+  .chip-concrete.active { background: #374151; border-color: #374151; }
+  .chip-pumice { }
+  .chip-pumice.active { background: #0f766e; border-color: #0f766e; }
+
+  .sort-select {
+    margin-right: auto;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .sort-select:focus { border-color: var(--accent); }
+
+  /* MAIN */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 32px;
+  }
+
+  /* RESULTS INFO */
+  .results-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .results-count {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .results-count strong { color: var(--text); font-weight: 700; }
+
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+  }
+
+  .view-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+
+  .view-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .products-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  /* CARD */
+  .product-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+  }
+
+  .product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: var(--accent);
+  }
+
+  .card-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .card-makat {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-weight: 400;
+    direction: ltr;
+    text-align: right;
+  }
+
+  .family-badge {
+    flex-shrink: 0;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-thermolock { background: #dbeafe; color: #1e40af; }
+  .badge-concrete { background: #f3f4f6; color: #374151; }
+  .badge-pumice { background: #ccfbf1; color: #0f766e; }
+
+  .status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+    display: inline-block;
+  }
+
+  .status-active { background: var(--green-light); color: var(--green); }
+  .status-inactive { background: var(--red-light); color: var(--red); }
+  .status-banned { background: var(--orange-light); color: var(--orange); }
+
+  .card-body {
+    padding: 14px 16px;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .price-main {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    direction: ltr;
+  }
+
+  .price-main span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-right: 2px;
+  }
+
+  .price-min-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: left;
+  }
+
+  .price-min-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+    direction: ltr;
+  }
+
+  .dims-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .dim-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .dim-chip strong { color: var(--text); font-weight: 700; }
+
+  .card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border-radius: 6px;
+  }
+
+  .detail-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .detail-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    direction: ltr;
+    text-align: right;
+  }
+
+  /* LIST VIEW */
+  .products-grid.list-view .product-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+
+  .products-grid.list-view .card-header {
+    border-bottom: none;
+    border-left: 1px solid var(--border);
+    padding: 14px 16px;
+    min-width: 280px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .products-grid.list-view .card-body {
+    padding: 12px 16px;
+  }
+
+  .products-grid.list-view .card-details {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .products-grid.list-view .price-row {
+    margin-bottom: 0;
+    min-width: 160px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
+  }
+
+  .empty-icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; }
+
+  /* HIGHLIGHT */
+  .hl {
+    background: #fef08a;
+    border-radius: 3px;
+    padding: 0 1px;
+  }
+
+  /* MODAL */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: sticky;
+    top: 0;
+    background: white;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .modal-title { font-size: 16px; font-weight: 700; line-height: 1.4; }
+  .modal-makat { font-size: 12px; color: var(--text-muted); margin-top: 4px; direction: ltr; }
+
+  .modal-close {
+    background: var(--surface2);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover { background: var(--border); }
+
+  .modal-body { padding: 20px 24px 24px; }
+
+  .modal-section { margin-bottom: 20px; }
+  .modal-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .modal-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+
+  .modal-item-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .modal-item-value { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 3px; direction: ltr; }
+  .modal-item-value.big { font-size: 20px; color: var(--accent); }
+
+  /* DISCOUNT BAR */
+  .discount-bar {
+    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+    border-bottom: 1px solid #fde68a;
+    padding: 10px 32px;
+    position: sticky;
+    top: 152px;
+    z-index: 80;
+  }
+
+  .discount-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .discount-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .discount-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .discount-input {
+    width: 90px;
+    padding: 7px 30px 7px 10px;
+    border-radius: 8px;
+    border: 1.5px solid #fcd34d;
+    background: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .discount-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+  .discount-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+
+  .discount-pct-sign {
+    position: absolute;
+    left: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #b45309;
+    pointer-events: none;
+  }
+
+  .discount-error {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    background: var(--red-light);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #fca5a5;
+  }
+
+  .discount-error.visible { display: flex; }
+
+  .discount-result {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #065f46;
+    background: var(--green-light);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #6ee7b7;
+  }
+
+  .discount-result.visible { display: flex; }
+  .discount-result strong { font-size: 15px; }
+
+  .discount-clear {
+    background: none;
+    border: 1.5px solid #fcd34d;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b45309;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    transition: background 0.15s;
+    display: none;
+  }
+
+  .discount-clear:hover { background: #fef3c7; }
+  .discount-clear.visible { display: block; }
+
+  /* DISCOUNTED PRICE on card */
+  .discounted-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-radius: var(--radius-sm);
+    border: 1px solid #6ee7b7;
+  }
+
+  .discounted-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .discounted-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--green);
+    direction: ltr;
+  }
+
+  .discount-tag {
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--green);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* SHIPPING SECTION */
+  .shipping-section {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-bottom: 1px solid #bae6fd;
+    padding: 16px 32px;
+  }
+
+  .shipping-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .shipping-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0c4a6e;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .shipping-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .shipping-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 220px;
+    max-width: 360px;
+  }
+
+  .shipping-input {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    border-radius: 9px;
+    border: 1.5px solid #7dd3fc;
+    background: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .shipping-input:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2,132,199,0.12); }
+
+  .shipping-search-icon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .shipping-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    left: 0;
+    background: white;
+    border: 1.5px solid #7dd3fc;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 300;
+  }
+
+  .shipping-dropdown.open { display: block; }
+
+  .shipping-option {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f9ff;
+    transition: background 0.1s;
+  }
+
+  .shipping-option:last-child { border-bottom: none; }
+  .shipping-option:hover { background: #f0f9ff; }
+  .shipping-option .city-name { color: var(--text); }
+  .shipping-option .city-range { font-size: 11px; color: var(--text-muted); background: #e0f2fe; padding: 1px 7px; border-radius: 8px; }
+  .shipping-option .city-match { background: #fef08a; border-radius: 2px; padding: 0 1px; }
+
+  .shipping-no-results {
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .shipping-result-cards {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .shipping-card {
+    background: white;
+    border-radius: 10px;
+    border: 1.5px solid #7dd3fc;
+    padding: 12px 16px;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .shipping-card.selected-city {
+    background: linear-gradient(135deg, #0c4a6e, #0369a1);
+    border-color: transparent;
+    color: white;
+    min-width: 190px;
+  }
+
+  .shipping-card-label {
+    font-size: 10px;
+    font-weight: 600;
+    opacity: 0.65;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .shipping-card-value {
+    font-size: 20px;
+    font-weight: 800;
+    direction: ltr;
+  }
+
+  .shipping-card.selected-city .shipping-card-label { opacity: 0.75; }
+  .shipping-card.selected-city .shipping-card-value { font-size: 16px; font-weight: 700; }
+
+  .shipping-card .range-badge {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .shipping-card.double-card { border-color: #6366f1; }
+  .shipping-card.double-card .shipping-card-value { color: #4338ca; }
+  .shipping-card.double-card .shipping-card-label { color: #6366f1; }
+
+  .shipping-card.full-card { border-color: #f59e0b; }
+  .shipping-card.full-card .shipping-card-value { color: #b45309; }
+  .shipping-card.full-card .shipping-card-label { color: #d97706; }
+
+  .shipping-card.km-card { border-color: var(--border); }
+  .shipping-card.km-card .shipping-card-value { color: var(--text-muted); font-size: 18px; }
+
+  .shipping-clear-city {
+    background: none;
+    border: 1.5px solid #7dd3fc;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0284c7;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    transition: background 0.15s;
+    align-self: center;
+  }
+
+  .shipping-clear-city:hover { background: #e0f2fe; }
+
+  .shipping-na {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    align-self: center;
+  }
+
+  .shipping-sub-grid {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .shipping-sub-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0,0,0,0.04);
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-width: 56px;
+  }
+
+  .shipping-sub-item span { font-size: 10px; opacity: 0.65; font-weight: 500; }
+  .shipping-sub-item strong { font-size: 13px; font-weight: 700; direction: ltr; }
+
+  /* Shipping cost row on product card */
+  .ship-cost-row {
+    margin-top: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(135deg,#eef2ff,#e0e7ff);
+    overflow: hidden;
+  }
+
+  .ship-cost-row-header {
+    font-size: 10px;
+    font-weight: 700;
+    color: #4338ca;
+    padding: 5px 10px 3px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .ship-cost-trucks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #c7d2fe;
+    border-top: 1px solid #c7d2fe;
+  }
+
+  .ship-cost-truck {
+    background: white;
+    padding: 6px 10px;
+  }
+
+  .ship-cost-truck-label { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+  .ship-cost-truck-total { font-size: 12px; font-weight: 700; color: #4338ca; direction: ltr; }
+  .ship-cost-truck-total.full { color: #b45309; }
+
+  .ship-cost-breakdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #c7d2fe;
+    border-top: 1px solid #c7d2fe;
+  }
+
+  .ship-cost-cell {
+    background: #f5f3ff;
+    padding: 5px 8px;
+    text-align: center;
+  }
+
+  .ship-cost-cell-label { font-size: 9px; color: var(--text-muted); font-weight: 500; }
+  .ship-cost-cell-val { font-size: 12px; font-weight: 700; color: #312e81; direction: ltr; margin-top: 1px; }
+  .ship-cost-cell-val.full { color: #92400e; }
+
+  /* total after discount + shipping */
+  .total-cost-row {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    border-radius: var(--radius-sm);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .total-cost-label { font-size: 11px; font-weight: 600; opacity: 0.75; }
+  .total-cost-trucks { display: flex; gap: 12px; }
+  .total-cost-item { display: flex; flex-direction: column; align-items: center; }
+  .total-cost-item-lbl { font-size: 9px; opacity: 0.65; font-weight: 500; }
+  .total-cost-item-val { font-size: 16px; font-weight: 800; direction: ltr; }
+
+  @media (max-width: 768px) {
+    .shipping-section { padding: 12px 16px; }
+    .shipping-search-wrap { max-width: 100%; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    header { padding: 16px 16px 14px; }
+    .filters-bar { padding: 10px 16px; top: 90px; }
+    main { padding: 16px; }
+    .products-grid { grid-template-columns: 1fr; }
+    .header-stats { display: none; }
+    .products-grid.list-view { grid-template-columns: 1fr; }
+    .products-grid.list-view .product-card { display: block; }
+    .products-grid.list-view .card-header { border-left: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-icon">🧱</div>
+      <div class="logo-text">
+        <h1>מחירון בסיס</h1>
+        <p>תרמודן / טרמולוק / פומיס</p>
+      </div>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="חיפוש לפי תיאור, מק&quot;ט, משפחה..." autocomplete="off">
+      <button class="clear-btn" id="clearBtn" title="נקה חיפוש">✕</button>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">סה"כ: <span id="totalCount">0</span> מוצרים</div>
+      <div class="stat-pill">מוצג: <span id="shownCount">0</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="filters-bar">
+  <div class="filters-inner">
+    <span class="filter-label">משפחה:</span>
+    <div class="filter-chips">
+      <button class="chip active" data-family="all">הכל</button>
+      <button class="chip chip-thermolock" data-family="טרמולוק">טרמולוק</button>
+      <button class="chip chip-concrete" data-family="בטון">בטון</button>
+      <button class="chip chip-pumice" data-family="פומיס">פומיס</button>
+    </div>
+    <span class="filter-label" style="margin-right: 12px;">סטטוס:</span>
+    <div class="filter-chips">
+      <button class="chip active" data-status="all">הכל</button>
+      <button class="chip" data-status="פעיל">פעיל</button>
+      <button class="chip" data-status="אסור למכירה">אסור</button>
+    </div>
+    <select class="sort-select" id="sortSelect">
+      <option value="default">מיון: ברירת מחדל</option>
+      <option value="price_asc">מחיר: נמוך לגבוה</option>
+      <option value="price_desc">מחיר: גבוה לנמוך</option>
+      <option value="name_asc">שם: א-ת</option>
+      <option value="makat_asc">מק"ט: עולה</option>
+    </select>
+    <div class="view-toggle">
+      <button class="view-btn active" id="gridViewBtn" title="תצוגת רשת">⊞</button>
+      <button class="view-btn" id="listViewBtn" title="תצוגת רשימה">☰</button>
+    </div>
+  </div>
+</div>
+
+<div class="discount-bar">
+  <div class="discount-inner">
+    <span class="discount-label">🏷️ הנחה גלובלית:</span>
+    <div class="discount-input-wrap">
+      <input type="number" id="discountInput" class="discount-input" placeholder="0" min="0" max="100" step="0.1">
+      <span class="discount-pct-sign">%</span>
+    </div>
+    <div class="discount-error" id="discountError">⚠️ לא ניתן לממש — יש להזין ערך בין 0 ל-100</div>
+    <div class="discount-result" id="discountResult">✓ הנחה של <strong id="discountPct"></strong>% מוחלת על כל המחירים</div>
+    <button class="discount-clear" id="discountClear">✕ נקה הנחה</button>
+  </div>
+</div>
+
+<div class="shipping-section">
+  <div class="shipping-inner">
+    <div class="shipping-title">🚛 עלות הובלה לפי יישוב</div>
+    <div class="shipping-controls">
+      <div class="shipping-search-wrap">
+        <span class="shipping-search-icon">🔍</span>
+        <input type="text" id="cityInput" class="shipping-input" placeholder="הקלד שם יישוב..." autocomplete="off">
+        <div class="shipping-dropdown" id="cityDropdown"></div>
+      </div>
+      <div class="shipping-result-cards" id="shippingResults" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="results-info">
+    <div class="results-count" id="resultsCount">מציג <strong>0</strong> מוצרים</div>
+  </div>
+  <div class="products-grid" id="productsGrid"></div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-makat" id="modalMakat"></div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const DATA = [{"מק\"ט":1100070096,"תאור":"בטון טרמולוק 7 שקע/תקע בניה 7*25*50 4ח'","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.25,"אורך במטר":0.5,"עובי במטר":0.07,"משקל יחידה בק\"ג":13.22,"מחיר מחירון בסיס":5.79,"יחידות במ\"ק":114.29,"יחידות במ\"ר":8.0,"יחידות בטון":75.64,"מחיר מינימום":4.05,"מחיר בסיס לקוב":662,"מחיר בסיס למשטח":556,"מחיר בסיס למ\"ר":46,"משקל לקוב":1511,"קוב במשטח":0.84,"משקל למשטח":1269},{"מק\"ט":1100100096,"תאור":"בטון טרמולוק 10 שקע/תקע בניה 10*25*50 4ח'","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.25,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":14.14,"מחיר מחירון בסיס":5.79,"יחידות במ\"ק":80.0,"יחידות במ\"ר":8.0,"יחידות בטון":70.72,"מחיר מינימום":4.05,"מחיר בסיס לקוב":463,"מחיר בסיס למשטח":556,"מחיר בסיס למ\"ר":46,"משקל לקוב":1131,"קוב במשטח":1.2,"משקל למשטח":1357},{"מק\"ט":1100150090,"תאור":"בטון טרמולוק 15 שקע/תקע בניה 15*20*40  פ'","סטטוס":"פעיל","כמות במשטח":90,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":12.2,"מחיר מחירון בסיס":5.56,"יחידות במ\"ק":83.33,"יחידות במ\"ר":12.5,"יחידות בטון":81.97,"מחיר מינימום":3.89,"מחיר בסיס לקוב":463,"מחיר בסיס למשטח":500,"מחיר בסיס למ\"ר":70,"משקל לקוב":1017,"קוב במשטח":1.08,"משקל למשטח":1098},{"מק\"ט":1100200075,"תאור":"בטון טרמולוק 20 שקע/תקע 20*20*40","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":18.1,"מחיר מחירון בסיס":7.41,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":55.25,"מחיר מינימום":5.19,"מחיר בסיס לקוב":463,"מחיר בסיס למשטח":556,"מחיר בסיס למ\"ר":93,"משקל לקוב":1131,"קוב במשטח":1.2,"משקל למשטח":1358},{"מק\"ט":1101100192,"תאור":"בטון טרמולוק 10 שקע/תקע חצי 10*25*25","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.25,"אורך במטר":0.25,"עובי במטר":0.1,"משקל יחידה בק\"ג":7.06,"מחיר מחירון בסיס":4.4,"יחידות במ\"ק":160.0,"יחידות במ\"ר":16.0,"יחידות בטון":141.64,"מחיר מינימום":3.08,"מחיר בסיס לקוב":704,"מחיר בסיס למשטח":845,"מחיר בסיס למ\"ר":70,"משקל לקוב":1130,"קוב במשטח":1.2,"משקל למשטח":1356},{"מק\"ט":1101150200,"תאור":"בטון טרמולוק 15 שקע/תקע חצי 15*20*20","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.2,"עובי במטר":0.15,"משקל יחידה בק\"ג":6.4,"מחיר מחירון בסיס":4.17,"יחידות במ\"ק":166.67,"יחידות במ\"ר":25.0,"יחידות בטון":156.25,"מחיר מינימום":2.92,"מחיר בסיס לקוב":695,"מחיר בסיס למשטח":834,"מחיר בסיס למ\"ר":104,"משקל לקוב":1067,"קוב במשטח":1.2,"משקל למשטח":1280},{"מק\"ט":1101200150,"תאור":"בטון טרמולוק 20 שקע/תקע חצי","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.2,"עובי במטר":0.2,"משקל יחידה בק\"ג":8.76,"מחיר מחירון בסיס":5.56,"יחידות במ\"ק":125.0,"יחידות במ\"ר":25.0,"יחידות בטון":114.22,"מחיר מינימום":3.89,"מחיר בסיס לקוב":695,"מחיר בסיס למשטח":834,"מחיר בסיס למ\"ר":139,"משקל לקוב":1094,"קוב במשטח":1.2,"משקל למשטח":1313},{"מק\"ט":1101250192,"תאור":"בטון טרמולוק 7 שקע/תקע חצי 7*25*25","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.25,"אורך במטר":0.25,"עובי במטר":0.07,"משקל יחידה בק\"ג":6.61,"מחיר מחירון בסיס":4.4,"יחידות במ\"ק":228.57,"יחידות במ\"ר":16.0,"יחידות בטון":151.29,"מחיר מינימום":3.08,"מחיר בסיס לקוב":1006,"מחיר בסיס למשטח":845,"מחיר בסיס למ\"ר":70,"משקל לקוב":1511,"קוב במשטח":0.84,"משקל למשטח":1269},{"מק\"ט":1102050150,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 5","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.05,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":4.37,"מחיר מחירון בסיס":6.12,"יחידות במ\"ק":250.0,"יחידות במ\"ר":50.0,"יחידות בטון":228.83,"מחיר מינימום":4.28,"מחיר בסיס לקוב":1529,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":306,"משקל לקוב":1093,"קוב במשטח":0.6,"משקל למשטח":656},{"מק\"ט":1102050192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*5","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.05,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":4.71,"מחיר מחירון בסיס":5.15,"יחידות במ\"ק":400.0,"יחידות במ\"ר":40.0,"יחידות בטון":212.31,"מחיר מינימום":3.6,"מחיר בסיס לקוב":2059,"מחיר בסיס למשטח":988,"מחיר בסיס למ\"ר":206,"משקל לקוב":1884,"קוב במשטח":0.48,"משקל למשטח":904},{"מק\"ט":1102050200,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 5","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.05,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":3.05,"מחיר מחירון בסיס":4.59,"יחידות במ\"ק":266.67,"יחידות במ\"ר":40.0,"יחידות בטון":327.87,"מחיר מינימום":3.21,"מחיר בסיס לקוב":1223,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":183,"משקל לקוב":813,"קוב במשטח":0.75,"משקל למשטח":610},{"מק\"ט":1102060192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*6","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.06,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":5.65,"מחיר מחירון בסיס":5.15,"יחידות במ\"ק":333.33,"יחידות במ\"ר":33.33,"יחידות בטון":176.93,"מחיר מינימום":3.6,"מחיר בסיס לקוב":1716,"מחיר בסיס למשטח":988,"מחיר בסיס למ\"ר":172,"משקל לקוב":1884,"קוב במשטח":0.58,"משקל למשטח":1085},{"מק\"ט":1102070192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*7","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.07,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":7.06,"מחיר מחירון בסיס":6.01,"יחידות במ\"ק":285.71,"יחידות במ\"ר":28.57,"יחידות בטון":141.64,"מחיר מינימום":4.2,"מחיר בסיס לקוב":1716,"מחיר בסיס למשטח":1153,"מחיר בסיס למ\"ר":172,"משקל לקוב":2017,"קוב במשטח":0.67,"משקל למשטח":1356},{"מק\"ט":1102070200,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 7","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.07,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":5.16,"מחיר מחירון בסיס":4.59,"יחידות במ\"ק":190.48,"יחידות במ\"ר":28.57,"יחידות בטון":193.99,"מחיר מינימום":3.21,"מחיר בסיס לקוב":874,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":131,"משקל לקוב":982,"קוב במשטח":1.05,"משקל למשטח":1031},{"מק\"ט":1102071192,"תאור":"בטון טרמולוק 7 שקע/תקע וופלה 7*10*50","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.1,"אורך במטר":0.5,"עובי במטר":0.07,"משקל יחידה בק\"ג":5.29,"מחיר מחירון בסיס":5.84,"יחידות במ\"ק":285.71,"יחידות במ\"ר":20.0,"יחידות בטון":189.11,"מחיר מינימום":4.09,"מחיר בסיס לקוב":1669,"מחיר בסיס למשטח":1121,"מחיר בסיס למ\"ר":117,"משקל לקוב":1511,"קוב במשטח":0.67,"משקל למשטח":1015},{"מק\"ט":1102080150,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 8","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.08,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":7.8,"מחיר מחירון בסיס":6.12,"יחידות במ\"ק":156.25,"יחידות במ\"ר":31.25,"יחידות בטון":128.21,"מחיר מינימום":4.28,"מחיר בסיס לקוב":956,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":191,"משקל לקוב":1219,"קוב במשטח":0.96,"משקל למשטח":1170},{"מק\"ט":1102080192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*8","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.08,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":7.06,"מחיר מחירון בסיס":6.01,"יחידות במ\"ק":250.0,"יחידות במ\"ר":25.0,"יחידות בטון":141.64,"מחיר מינימום":4.2,"מחיר בסיס לקוב":1502,"מחיר בסיס למשטח":1153,"מחיר בסיס למ\"ר":150,"משקל לקוב":1765,"קוב במשטח":0.77,"משקל למשטח":1356},{"מק\"ט":1102080200,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 8","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.08,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":5.16,"מחיר מחירון בסיס":4.59,"יחידות במ\"ק":166.67,"יחידות במ\"ר":25.0,"יחידות בטון":193.99,"מחיר מינימום":3.21,"מחיר בסיס לקוב":765,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":115,"משקל לקוב":859,"קוב במשטח":1.2,"משקל למשטח":1031},{"מק\"ט":1102090200,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 9","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.09,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":5.8,"מחיר מחירון בסיס":4.59,"יחידות במ\"ק":148.15,"יחידות במ\"ר":22.22,"יחידות בטון":172.41,"מחיר מינימום":3.21,"מחיר בסיס לקוב":680,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":102,"משקל לקוב":859,"קוב במשטח":1.35,"משקל למשטח":1160},{"מק\"ט":1102100150,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 10","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.1,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":8.73,"מחיר מחירון בסיס":6.12,"יחידות במ\"ק":125.0,"יחידות במ\"ר":25.0,"יחידות בטון":114.61,"מחיר מינימום":4.28,"מחיר בסיס לקוב":765,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":153,"משקל לקוב":1091,"קוב במשטח":1.2,"משקל למשטח":1309},{"מק\"ט":1102100192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*10","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.1,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":5.65,"מחיר מחירון בסיס":6.01,"יחידות במ\"ק":200.0,"יחידות במ\"ר":20.0,"יחידות בטון":176.99,"מחיר מינימום":4.2,"מחיר בסיס לקוב":1201,"מחיר בסיס למשטח":1153,"מחיר בסיס למ\"ר":120,"משקל לקוב":1130,"קוב במשטח":0.96,"משקל למשטח":1085},{"מק\"ט":1102100200,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 10","סטטוס":"פעיל","כמות במשטח":200,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.1,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":6.1,"מחיר מחירון בסיס":4.59,"יחידות במ\"ק":166.67,"יחידות במ\"ר":25.0,"יחידות בטון":163.93,"מחיר מינימום":3.21,"מחיר בסיס לקוב":765,"מחיר בסיס למשטח":917,"מחיר בסיס למ\"ר":115,"משקל לקוב":1017,"קוב במשטח":1.2,"משקל למשטח":1220},{"מק\"ט":1102110192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*11","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.11,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":6.0,"מחיר מחירון בסיס":6.01,"יחידות במ\"ק":181.82,"יחידות במ\"ר":18.18,"יחידות בטון":166.67,"מחיר מינימום":4.2,"מחיר בסיס לקוב":1092,"מחיר בסיס למשטח":1153,"מחיר בסיס למ\"ר":109,"משקל לקוב":1091,"קוב במשטח":1.06,"משקל למשטח":1152},{"מק\"ט":1102120075,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 12","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.12,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":12.1,"מחיר מחירון בסיס":6.78,"יחידות במ\"ק":104.17,"יחידות במ\"ר":20.83,"יחידות בטון":82.65,"מחיר מינימום":4.74,"מחיר בסיס לקוב":706,"מחיר בסיס למשטח":508,"מחיר בסיס למ\"ר":141,"משקל לקוב":1260,"קוב במשטח":0.72,"משקל למשטח":908},{"מק\"ט":1102120120,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 12","סטטוס":"פעיל","כמות במשטח":120,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.12,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":7.32,"מחיר מחירון בסיס":6.2,"יחידות במ\"ק":111.11,"יחידות במ\"ר":16.67,"יחידות בטון":136.61,"מחיר מינימום":4.34,"מחיר בסיס לקוב":689,"מחיר בסיס למשטח":744,"מחיר בסיס למ\"ר":103,"משקל לקוב":813,"קוב במשטח":1.08,"משקל למשטח":878},{"מק\"ט":1102120192,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*12","סטטוס":"פעיל","כמות במשטח":192,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.12,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":6.78,"מחיר מחירון בסיס":6.01,"יחידות במ\"ק":166.67,"יחידות במ\"ר":16.67,"יחידות בטון":147.49,"מחיר מינימום":4.2,"מחיר בסיס לקוב":1001,"מחיר בסיס למשטח":1153,"מחיר בסיס למ\"ר":100,"משקל לקוב":1130,"קוב במשטח":1.15,"משקל למשטח":1302},{"מק\"ט":1102130075,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 13","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.13,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":12.7,"מחיר מחירון בסיס":6.78,"יחידות במ\"ק":96.15,"יחידות במ\"ר":19.23,"יחידות בטון":78.74,"מחיר מינימום":4.74,"מחיר בסיס לקוב":652,"מחיר בסיס למשטח":508,"מחיר בסיס למ\"ר":130,"משקל לקוב":1221,"קוב במשטח":0.78,"משקל למשטח":953},{"מק\"ט":1102130096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*13","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.13,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":7.8,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":153.85,"יחידות במ\"ר":15.39,"יחידות בטון":128.21,"מחיר מינימום":5.61,"מחיר בסיס לקוב":1234,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":123,"משקל לקוב":1200,"קוב במשטח":0.62,"משקל למשטח":749},{"מק\"ט":1102140075,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 14","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.14,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":13.3,"מחיר מחירון בסיס":6.78,"יחידות במ\"ק":89.29,"יחידות במ\"ר":17.86,"יחידות בטון":75.19,"מחיר מינימום":4.74,"מחיר בסיס לקוב":605,"מחיר בסיס למשטח":508,"מחיר בסיס למ\"ר":121,"משקל לקוב":1188,"קוב במשטח":0.84,"משקל למשטח":998},{"מק\"ט":1102140096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*14","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.14,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":7.91,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":142.86,"יחידות במ\"ר":14.29,"יחידות בטון":126.42,"מחיר מינימום":5.61,"מחיר בסיס לקוב":1146,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":115,"משקל לקוב":1130,"קוב במשטח":0.67,"משקל למשטח":759},{"מק\"ט":1102140120,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 14","סטטוס":"פעיל","כמות במשטח":120,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.14,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":8.54,"מחיר מחירון בסיס":6.11,"יחידות במ\"ק":95.24,"יחידות במ\"ר":14.29,"יחידות בטון":117.1,"מחיר מינימום":4.27,"מחיר בסיס לקוב":581,"מחיר בסיס למשטח":733,"מחיר בסיס למ\"ר":87,"משקל לקוב":813,"קוב במשטח":1.26,"משקל למשטח":1025},{"מק\"ט":1102150075,"תאור":"בטון טרמולוק 20 שקע/תקע וופלה גובה 15","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.15,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":13.9,"מחיר מחירון בסיס":6.78,"יחידות במ\"ק":83.33,"יחידות במ\"ר":16.67,"יחידות בטון":71.94,"מחיר מינימום":4.74,"מחיר בסיס לקוב":565,"מחיר בסיס למשטח":508,"מחיר בסיס למ\"ר":113,"משקל לקוב":1158,"קוב במשטח":0.9,"משקל למשטח":1042},{"מק\"ט":1102150096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*15","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.15,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":8.48,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":133.33,"יחידות במ\"ר":13.33,"יחידות בטון":117.93,"מחיר מינימום":5.61,"מחיר בסיס לקוב":1069,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":107,"משקל לקוב":1131,"קוב במשטח":0.72,"משקל למשטח":814},{"מק\"ט":1102150120,"תאור":"בטון טרמולוק 15 שקע/תקע וופלה גובה 15","סטטוס":"פעיל","כמות במשטח":100,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.15,"אורך במטר":0.5,"עובי במטר":0.15,"משקל יחידה בק\"ג":7.32,"מחיר מחירון בסיס":6.82,"יחידות במ\"ק":88.89,"יחידות במ\"ר":13.33,"יחידות בטון":136.61,"מחיר מינימום":4.77,"מחיר בסיס לקוב":606,"מחיר בסיס למשטח":682,"מחיר בסיס למ\"ר":91,"משקל לקוב":651,"קוב במשטח":1.13,"משקל למשטח":732},{"מק\"ט":1102160096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*16","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.16,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":9.04,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":125.0,"יחידות במ\"ר":12.5,"יחידות בטון":110.62,"מחיר מינימום":5.61,"מחיר בסיס לקוב":1002,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":100,"משקל לקוב":1130,"קוב במשטח":0.77,"משקל למשטח":868},{"מק\"ט":1102170096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*17","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.17,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":10.17,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":117.65,"יחידות במ\"ר":11.77,"יחידות בטון":98.33,"מחיר מינימום":5.61,"מחיר בסיס לקוב":943,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":94,"משקל לקוב":1196,"קוב במשטח":0.82,"משקל למשטח":976},{"מק\"ט":1102180096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*18","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.18,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":10.17,"מחיר מחירון בסיס":8.02,"יחידות במ\"ק":111.11,"יחידות במ\"ר":11.11,"יחידות בטון":98.33,"מחיר מינימום":5.61,"מחיר בסיס לקוב":891,"מחיר בסיס למשטח":770,"מחיר בסיס למ\"ר":89,"משקל לקוב":1130,"קוב במשטח":0.86,"משקל למשטח":976},{"מק\"ט":1102200096,"תאור":"בטון טרמולוק 10 שקע/תקע וופלה 50*10*20","סטטוס":"פעיל","כמות במשטח":96,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.1,"משקל יחידה בק\"ג":11.3,"מחיר מחירון בסיס":9.0,"יחידות במ\"ק":100.0,"יחידות במ\"ר":10.0,"יחידות בטון":88.5,"מחיר מינימום":6.3,"מחיר בסיס לקוב":900,"מחיר בסיס למשטח":864,"מחיר בסיס למ\"ר":90,"משקל לקוב":1130,"קוב במשטח":0.96,"משקל למשטח":1085},{"מק\"ט":1103150100,"תאור":"בטון טרמולוק 15 שקע/תקע תעלה U","סטטוס":"פעיל","כמות במשטח":100,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":12.0,"מחיר מחירון בסיס":10.8,"יחידות במ\"ק":83.33,"יחידות במ\"ר":12.5,"יחידות בטון":83.33,"מחיר מינימום":7.56,"מחיר בסיס לקוב":900,"מחיר בסיס למשטח":1080,"מחיר בסיס למ\"ר":135,"משקל לקוב":1000,"קוב במשטח":1.2,"משקל למשטח":1200},{"מק\"ט":1110070190,"תאור":"בטון 7*20*40 3ח'","סטטוס":"פעיל","כמות במשטח":190,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.07,"משקל יחידה בק\"ג":7.45,"מחיר מחירון בסיס":2.56,"יחידות במ\"ק":178.57,"יחידות במ\"ר":12.5,"יחידות בטון":134.23,"מחיר מינימום":1.79,"מחיר בסיס לקוב":457,"מחיר בסיס למשטח":486,"מחיר בסיס למ\"ר":32,"משקל לקוב":1330,"קוב במשטח":1.06,"משקל למשטח":1415},{"מק\"ט":1110100150,"תאור":"בטון 10*20*40 3ח' פ'","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":9.23,"מחיר מחירון בסיס":2.74,"יחידות במ\"ק":125.0,"יחידות במ\"ר":12.5,"יחידות בטון":108.34,"מחיר מינימום":1.92,"מחיר בסיס לקוב":343,"מחיר בסיס למשטח":411,"מחיר בסיס למ\"ר":34,"משקל לקוב":1154,"קוב במשטח":1.2,"משקל למשטח":1385},{"מק\"ט":1110100180,"תאור":"בטון 10*20*40 3ח' (180)","סטטוס":"פעיל","כמות במשטח":180,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":9.23,"מחיר מחירון בסיס":2.74,"יחידות במ\"ק":125.0,"יחידות במ\"ר":12.5,"יחידות בטון":108.34,"מחיר מינימום":1.92,"מחיר בסיס לקוב":343,"מחיר בסיס למשטח":493,"מחיר בסיס למ\"ר":34,"משקל לקוב":1154,"קוב במשטח":1.44,"משקל למשטח":1661},{"מק\"ט":1110150099,"תאור":"בטון 15*20*40 4ח'","סטטוס":"פעיל","כמות במשטח":99,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":14.22,"מחיר מחירון בסיס":4.2,"יחידות במ\"ק":83.33,"יחידות במ\"ר":12.5,"יחידות בטון":70.32,"מחיר מינימום":2.94,"מחיר בסיס לקוב":350,"מחיר בסיס למשטח":416,"מחיר בסיס למ\"ר":53,"משקל לקוב":1185,"קוב במשטח":1.19,"משקל למשטח":1408},{"מק\"ט":1110200075,"תאור":"בטון 20*20*40 4ח'(75) פ'","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":16.43,"מחיר מחירון בסיס":4.98,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":60.86,"מחיר מינימום":3.49,"מחיר בסיס לקוב":311,"מחיר בסיס למשטח":374,"מחיר בסיס למ\"ר":62,"משקל לקוב":1027,"קוב במשטח":1.2,"משקל למשטח":1232},{"מק\"ט":1110200090,"תאור":"בטון 20*20*40 4ח'(90)","סטטוס":"פעיל","כמות במשטח":90,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":16.43,"מחיר מחירון בסיס":4.98,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":60.86,"מחיר מינימום":3.49,"מחיר בסיס לקוב":311,"מחיר בסיס למשטח":448,"מחיר בסיס למ\"ר":62,"משקל לקוב":1027,"קוב במשטח":1.44,"משקל למשטח":1479},{"מק\"ט":1112100150,"תאור":"בטון וופלה 20*10*40","סטטוס":"פעיל","כמות במשטח":150,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.1,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":8.22,"מחיר מחירון בסיס":5.08,"יחידות במ\"ק":125.0,"יחידות במ\"ר":25.0,"יחידות בטון":121.73,"מחיר מינימום":3.56,"מחיר בסיס לקוב":635,"מחיר בסיס למשטח":762,"מחיר בסיס למ\"ר":127,"משקל לקוב":1027,"קוב במשטח":1.2,"משקל למשטח":1232},{"מק\"ט":1112100300,"תאור":"בטון וופלה 10*10*40","סטטוס":"פעיל","כמות במשטח":300,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.1,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":4.62,"מחיר מחירון בסיס":4.43,"יחידות במ\"ק":250.0,"יחידות במ\"ר":25.0,"יחידות בטון":216.69,"מחיר מינימום":3.1,"מחיר בסיס לקוב":1108,"מחיר בסיס למשטח":1330,"מחיר בסיס למ\"ר":111,"משקל לקוב":1154,"קוב במשטח":1.2,"משקל למשטח":1385},{"מק\"ט":1112100380,"תאור":"בטון וופלה 7*10*40","סטטוס":"פעיל","כמות במשטח":380,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.1,"אורך במטר":0.4,"עובי במטר":0.07,"משקל יחידה בק\"ג":3.73,"מחיר מחירון בסיס":3.98,"יחידות במ\"ק":357.14,"יחידות במ\"ר":25.0,"יחידות בטון":268.46,"מחיר מינימום":2.79,"מחיר בסיס לקוב":1422,"מחיר בסיס למשטח":1513,"מחיר בסיס למ\"ר":100,"משקל לקוב":1330,"קוב במשטח":1.06,"משקל למשטח":1416},{"מק\"ט":1112150210,"תאור":"בטון וופלה 10*15*40","סטטוס":"פעיל","כמות במשטח":210,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.15,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":6.92,"מחיר מחירון בסיס":7.07,"יחידות במ\"ק":166.67,"יחידות במ\"ר":16.67,"יחידות בטון":144.47,"מחיר מינימום":4.95,"מחיר בסיס לקוב":1179,"מחיר בסיס למשטח":1485,"מחיר בסיס למ\"ר":118,"משקל לקוב":1154,"קוב במשטח":1.26,"משקל למשטח":1454},{"מק\"ט":1112150266,"תאור":"בטון וופלה 7*15*40","סטטוס":"פעיל","כמות במשטח":266,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.15,"אורך במטר":0.4,"עובי במטר":0.07,"משקל יחידה בק\"ג":5.59,"מחיר מחירון בסיס":0,"יחידות במ\"ק":238.1,"יחידות במ\"ר":16.67,"יחידות בטון":178.96,"מחיר מינימום":2.8,"מחיר בסיס לקוב":0,"מחיר בסיס למשטח":0,"מחיר בסיס למ\"ר":0,"משקל לקוב":1330,"קוב במשטח":1.12,"משקל למשטח":1486},{"מק\"ט":1120040230,"תאור":"פלטה 4 4*20*50 (230)","סטטוס":"פעיל","כמות במשטח":230,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.04,"משקל יחידה בק\"ג":7.66,"מחיר מחירון בסיס":3.44,"יחידות במ\"ק":250.0,"יחידות במ\"ר":10.0,"יחידות בטון":130.55,"מחיר מינימום":2.41,"מחיר בסיס לקוב":860,"מחיר בסיס למשטח":791,"מחיר בסיס למ\"ר":34,"משקל לקוב":1915,"קוב במשטח":0.92,"משקל למשטח":1762},{"מק\"ט":1121040460,"תאור":"פלטה 4 4*20*25 חצאים","סטטוס":"פעיל","כמות במשטח":460,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.04,"משקל יחידה בק\"ג":3.83,"מחיר מחירון בסיס":5.7,"יחידות במ\"ק":500.0,"יחידות במ\"ר":20.0,"יחידות בטון":261.1,"מחיר מינימום":3.99,"מחיר בסיס לקוב":2850,"מחיר בסיס למשטח":2622,"מחיר בסיס למ\"ר":114,"משקל לקוב":1915,"קוב במשטח":0.92,"משקל למשטח":1762},{"מק\"ט":1133200075,"תאור":"בטון טרמולוק 20 שקע/תקע בניה תעלה U סגור 2ח'","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":110,"תאור משפחה":"טרמולוק","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":19.9,"מחיר מחירון בסיס":11.57,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":50.25,"מחיר מינימום":8.1,"מחיר בסיס לקוב":723,"מחיר בסיס למשטח":868,"מחיר בסיס למ\"ר":145,"משקל לקוב":1244,"קוב במשטח":1.2,"משקל למשטח":1493},{"מק\"ט":1140200075,"תאור":"בטון תעלה 40*20*20 U","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":19.95,"מחיר מחירון בסיס":6.83,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":50.13,"מחיר מינימום":4.78,"מחיר בסיס לקוב":427,"מחיר בסיס למשטח":512,"מחיר בסיס למ\"ר":85,"משקל לקוב":1247,"קוב במשטח":1.2,"משקל למשטח":1496},{"מק\"ט":1140220050,"תאור":"בטון תעלה 50*20*22 U","סטטוס":"פעיל","כמות במשטח":50,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":24.2,"מחיר מחירון בסיס":9.39,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":41.32,"מחיר מינימום":6.57,"מחיר בסיס לקוב":427,"מחיר בסיס למשטח":470,"מחיר בסיס למ\"ר":94,"משקל לקוב":1100,"קוב במשטח":1.1,"משקל למשטח":1210},{"מק\"ט":1160100090,"תאור":"בטון מקשי 10*20*40","סטטוס":"פעיל","כמות במשטח":90,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":12.64,"מחיר מחירון בסיס":6.34,"יחידות במ\"ק":125.0,"יחידות במ\"ר":12.5,"יחידות בטון":79.11,"מחיר מינימום":4.44,"מחיר בסיס לקוב":793,"מחיר בסיס למשטח":571,"מחיר בסיס למ\"ר":79,"משקל לקוב":1580,"קוב במשטח":0.72,"משקל למשטח":1138},{"מק\"ט":1160140040,"תאור":"בטון מקשי 14*30*30","סטטוס":"פעיל","כמות במשטח":40,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.12,"אורך במטר":0.3,"עובי במטר":0.3,"משקל יחידה בק\"ג":27.0,"מחיר מחירון בסיס":10.74,"יחידות במ\"ק":92.59,"יחידות במ\"ר":27.78,"יחידות בטון":37.04,"מחיר מינימום":7.52,"מחיר בסיס לקוב":994,"מחיר בסיס למשטח":430,"מחיר בסיס למ\"ר":298,"משקל לקוב":2500,"קוב במשטח":0.43,"משקל למשטח":1080},{"מק\"ט":1160150072,"תאור":"בטון מקשי 15*20*40","סטטוס":"פעיל","כמות במשטח":72,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":22.98,"מחיר מחירון בסיס":8.81,"יחידות במ\"ק":83.33,"יחידות במ\"ר":12.5,"יחידות בטון":43.52,"מחיר מינימום":6.17,"מחיר בסיס לקוב":734,"מחיר בסיס למשטח":634,"מחיר בסיס למ\"ר":110,"משקל לקוב":1915,"קוב במשטח":0.86,"משקל למשטח":1655},{"מק\"ט":1160200060,"תאור":"בטון מקשי 20*20*40","סטטוס":"פעיל","כמות במשטח":60,"משפחת מוצר":100,"תאור משפחה":"בטון","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":29.3,"מחיר מחירון בסיס":10.67,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":34.13,"מחיר מינימום":7.47,"מחיר בסיס לקוב":667,"מחיר בסיס למשטח":640,"מחיר בסיס למ\"ר":133,"משקל לקוב":1831,"קוב במשטח":0.96,"משקל למשטח":1758},{"מק\"ט":1200200072,"תאור":"טרמודן דור 4 20*20*50 8ח'","סטטוס":"פעיל","כמות במשטח":72,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.2,"משקל יחידה בק\"ג":18.0,"מחיר מחירון בסיס":12.21,"יחידות במ\"ק":50.0,"יחידות במ\"ר":10.0,"יחידות בטון":55.56,"מחיר מינימום":8.55,"מחיר בסיס לקוב":611,"מחיר בסיס למשטח":879,"מחיר בסיס למ\"ר":122,"משקל לקוב":900,"קוב במשטח":1.44,"משקל למשטח":1296},{"מק\"ט":1200220060,"תאור":"טרמודן דור 5     22*20*50","סטטוס":"פעיל","כמות במשטח":60,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":22.2,"מחיר מחירון בסיס":13.43,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":45.05,"מחיר מינימום":9.4,"מחיר בסיס לקוב":610,"מחיר בסיס למשטח":806,"מחיר בסיס למ\"ר":134,"משקל לקוב":1009,"קוב במשטח":1.32,"משקל למשטח":1332},{"מק\"ט":1200221048,"תאור":"טרמודן דור 4 22*20*50 8ח' - 48 יחידות במשטח","סטטוס":"פעיל","כמות במשטח":48,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":20.0,"מחיר מחירון בסיס":12.87,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":50.0,"מחיר מינימום":9.01,"מחיר בסיס לקוב":585,"מחיר בסיס למשטח":618,"מחיר בסיס למ\"ר":129,"משקל לקוב":909,"קוב במשטח":1.06,"משקל למשטח":960},{"מק\"ט":1200250048,"תאור":"טרמודן דור 5     25*20*50","סטטוס":"פעיל","כמות במשטח":48,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.25,"משקל יחידה בק\"ג":25.0,"מחיר מחירון בסיס":18.7,"יחידות במ\"ק":40.0,"יחידות במ\"ר":10.0,"יחידות בטון":40.0,"מחיר מינימום":13.09,"מחיר בסיס לקוב":748,"מחיר בסיס למשטח":898,"מחיר בסיס למ\"ר":187,"משקל לקוב":1000,"קוב במשטח":1.2,"משקל למשטח":1200},{"מק\"ט":1200250120,"תאור":"טרמודן דור 5     25*20*25 חצאים","סטטוס":"פעיל","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.25,"משקל יחידה בק\"ג":12.5,"מחיר מחירון בסיס":13.78,"יחידות במ\"ק":80.0,"יחידות במ\"ר":20.0,"יחידות בטון":80.0,"מחיר מינימום":9.65,"מחיר בסיס לקוב":1102,"מחיר בסיס למשטח":1654,"מחיר בסיס למ\"ר":276,"משקל לקוב":1000,"קוב במשטח":1.5,"משקל למשטח":1500},{"מק\"ט":1200300048,"תאור":"טרמודן דור 5     30*20*50","סטטוס":"פעיל","כמות במשטח":48,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.3,"משקל יחידה בק\"ג":23.5,"מחיר מחירון בסיס":21.91,"יחידות במ\"ק":33.33,"יחידות במ\"ר":10.0,"יחידות בטון":42.55,"מחיר מינימום":15.34,"מחיר בסיס לקוב":730,"מחיר בסיס למשטח":1052,"מחיר בסיס למ\"ר":219,"משקל לקוב":783,"קוב במשטח":1.44,"משקל למשטח":1128},{"מק\"ט":1200502072,"תאור":"טרמודן דור 5     20*20*50","סטטוס":"פעיל","כמות במשטח":72,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.2,"משקל יחידה בק\"ג":20.4,"מחיר מחירון בסיס":12.21,"יחידות במ\"ק":50.0,"יחידות במ\"ר":10.0,"יחידות בטון":49.02,"מחיר מינימום":8.55,"מחיר בסיס לקוב":611,"מחיר בסיס למשטח":879,"מחיר בסיס למ\"ר":122,"משקל לקוב":1020,"קוב במשטח":1.44,"משקל למשטח":1469},{"מק\"ט":1201220120,"תאור":"טרמודן דור 5 חצי 22*20*25","סטטוס":"אסור למכירה","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.22,"משקל יחידה בק\"ג":12.0,"מחיר מחירון בסיס":0,"יחידות במ\"ק":90.91,"יחידות במ\"ר":20.0,"יחידות בטון":83.33,"מחיר מינימום":6.51,"מחיר בסיס לקוב":0,"מחיר בסיס למשטח":0,"מחיר בסיס למ\"ר":0,"משקל לקוב":1091,"קוב במשטח":1.32,"משקל למשטח":1440},{"מק\"ט":1202100120,"תאור":"וופלה דור 5   22*10*50","סטטוס":"פעיל","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.1,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":11.0,"מחיר מחירון בסיס":14.04,"יחידות במ\"ק":90.91,"יחידות במ\"ר":20.0,"יחידות בטון":90.91,"מחיר מינימום":9.83,"מחיר בסיס לקוב":1276,"מחיר בסיס למשטח":1684,"מחיר בסיס למ\"ר":281,"משקל לקוב":1000,"קוב במשטח":1.32,"משקל למשטח":1320},{"מק\"ט":1210100180,"תאור":"פומיס בניה 10*20*40 3ח'","סטטוס":"פעיל","כמות במשטח":180,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.1,"משקל יחידה בק\"ג":5.19,"מחיר מחירון בסיס":5.54,"יחידות במ\"ק":125.0,"יחידות במ\"ר":12.5,"יחידות בטון":192.68,"מחיר מינימום":3.88,"מחיר בסיס לקוב":693,"מחיר בסיס למשטח":997,"מחיר בסיס למ\"ר":69,"משקל לקוב":649,"קוב במשטח":1.44,"משקל למשטח":934},{"מק\"ט":1210150099,"תאור":"פומיס בניה 15*20*40","סטטוס":"פעיל","כמות במשטח":99,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.15,"משקל יחידה בק\"ג":8.01,"מחיר מחירון בסיס":7.58,"יחידות במ\"ק":83.33,"יחידות במ\"ר":12.5,"יחידות בטון":124.84,"מחיר מינימום":5.31,"מחיר בסיס לקוב":632,"מחיר בסיס למשטח":750,"מחיר בסיס למ\"ר":95,"משקל לקוב":667,"קוב במשטח":1.19,"משקל למשטח":793},{"מק\"ט":1211200144,"תאור":"פומיס חצי 20*20*25","סטטוס":"פעיל","כמות במשטח":144,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.2,"משקל יחידה בק\"ג":7.4,"מחיר מחירון בסיס":9.14,"יחידות במ\"ק":100.0,"יחידות במ\"ר":20.0,"יחידות בטון":135.14,"מחיר מינימום":6.4,"מחיר בסיס לקוב":914,"מחיר בסיס למשטח":1316,"מחיר בסיס למ\"ר":183,"משקל לקוב":740,"קוב במשטח":1.44,"משקל למשטח":1066},{"מק\"ט":1211220120,"תאור":"פומיס חצי 22*20*25","סטטוס":"פעיל","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.22,"משקל יחידה בק\"ג":8.0,"מחיר מחירון בסיס":9.63,"יחידות במ\"ק":90.91,"יחידות במ\"ר":20.0,"יחידות בטון":125.0,"מחיר מינימום":6.74,"מחיר בסיס לקוב":875,"מחיר בסיס למשטח":1156,"מחיר בסיס למ\"ר":193,"משקל לקוב":727,"קוב במשטח":1.32,"משקל למשטח":960},{"מק\"ט":1230221060,"תאור":"דור 5 PRO|22","סטטוס":"פעיל","כמות במשטח":60,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":21.0,"מחיר מחירון בסיס":16.93,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":47.62,"מחיר מינימום":11.85,"מחיר בסיס לקוב":770,"מחיר בסיס למשטח":1016,"מחיר בסיס למ\"ר":169,"משקל לקוב":955,"קוב במשטח":1.32,"משקל למשטח":1260},{"מק\"ט":1230250048,"תאור":"דור 5 PRO|25 - יחידות במשטח 48","סטטוס":"פעיל","כמות במשטח":48,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.25,"משקל יחידה בק\"ג":24.0,"מחיר מחירון בסיס":20.34,"יחידות במ\"ק":40.0,"יחידות במ\"ר":10.0,"יחידות בטון":41.67,"מחיר מינימום":14.24,"מחיר בסיס לקוב":814,"מחיר בסיס למשטח":976,"מחיר בסיס למ\"ר":203,"משקל לקוב":960,"קוב במשטח":1.2,"משקל למשטח":1152},{"מק\"ט":1230250060,"תאור":"דור 5 PRO|25","סטטוס":"לא פעיל","כמות במשטח":60,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.25,"משקל יחידה בק\"ג":24.0,"מחיר מחירון בסיס":18.49,"יחידות במ\"ק":40.0,"יחידות במ\"ר":10.0,"יחידות בטון":41.67,"מחיר מינימום":12.94,"מחיר בסיס לקוב":740,"מחיר בסיס למשטח":1109,"מחיר בסיס למ\"ר":185,"משקל לקוב":960,"קוב במשטח":1.5,"משקל למשטח":1440},{"מק\"ט":1231220120,"תאור":"דור 5 PRO|22 חצי","סטטוס":"אסור למכירה","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.22,"משקל יחידה בק\"ג":10.5,"מחיר מחירון בסיס":11.54,"יחידות במ\"ק":90.91,"יחידות במ\"ר":20.0,"יחידות בטון":95.24,"מחיר מינימום":8.08,"מחיר בסיס לקוב":1049,"מחיר בסיס למשטח":1385,"מחיר בסיס למ\"ר":231,"משקל לקוב":955,"קוב במשטח":1.32,"משקל למשטח":1260},{"מק\"ט":1231250120,"תאור":"דור 5 PRO|25 חצי","סטטוס":"לא פעיל","כמות במשטח":120,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.25,"עובי במטר":0.25,"משקל יחידה בק\"ג":11.5,"מחיר מחירון בסיס":13.87,"יחידות במ\"ק":80.0,"יחידות במ\"ר":20.0,"יחידות בטון":86.96,"מחיר מינימום":9.71,"מחיר בסיס לקוב":1110,"מחיר בסיס למשטח":1664,"מחיר בסיס למ\"ר":277,"משקל לקוב":920,"קוב במשטח":1.5,"משקל למשטח":1380},{"מק\"ט":1240200075,"תאור":"פומיס תעלה 40*20*20 U","סטטוס":"פעיל","כמות במשטח":75,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.4,"עובי במטר":0.2,"משקל יחידה בק\"ג":13.7,"מחיר מחירון בסיס":12.54,"יחידות במ\"ק":62.5,"יחידות במ\"ר":12.5,"יחידות בטון":72.99,"מחיר מינימום":8.78,"מחיר בסיס לקוב":784,"מחיר בסיס למשטח":941,"מחיר בסיס למ\"ר":157,"משקל לקוב":856,"קוב במשטח":1.2,"משקל למשטח":1028},{"מק\"ט":1240220050,"תאור":"פומיס תעלה 50*20*22 U","סטטוס":"פעיל","כמות במשטח":50,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":19.0,"מחיר מחירון בסיס":14.78,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":52.63,"מחיר מינימום":10.35,"מחיר בסיס לקוב":672,"מחיר בסיס למשטח":739,"מחיר בסיס למ\"ר":148,"משקל לקוב":864,"קוב במשטח":1.1,"משקל למשטח":950},{"מק\"ט":1250200072,"תאור":"פומיס שטרבה 50*20*20","סטטוס":"פעיל","כמות במשטח":72,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.2,"משקל יחידה בק\"ג":16.12,"מחיר מחירון בסיס":13.93,"יחידות במ\"ק":50.0,"יחידות במ\"ר":10.0,"יחידות בטון":62.04,"מחיר מינימום":9.75,"מחיר בסיס לקוב":697,"מחיר בסיס למשטח":1003,"מחיר בסיס למ\"ר":139,"משקל לקוב":806,"קוב במשטח":1.44,"משקל למשטח":1161},{"מק\"ט":1250220060,"תאור":"פומיס שטרבה 22*20*50 5ח'","סטטוס":"פעיל","כמות במשטח":60,"משפחת מוצר":200,"תאור משפחה":"פומיס","גובה במטר":0.2,"אורך במטר":0.5,"עובי במטר":0.22,"משקל יחידה בק\"ג":17.74,"מחיר מחירון בסיס":14.38,"יחידות במ\"ק":45.46,"יחידות במ\"ר":10.0,"יחידות בטון":56.37,"מחיר מינימום":10.07,"מחיר בסיס לקוב":654,"מחיר בסיס למשטח":863,"מחיר בסיס למ\"ר":144,"משקל לקוב":806,"קוב במשטח":1.32,"משקל למשטח":1064}];
+
+let currentFamily = 'all';
+let currentStatus = 'all';
+let currentSort = 'default';
+let currentSearch = '';
+let isListView = false;
+let currentDiscount = 0; // 0-100
+
+function fmt(n, decimals = 2) {
+  if (n == null || n === '' || isNaN(n)) return '—';
+  return Number(n).toLocaleString('he-IL', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return String(text).replace(new RegExp(`(${escaped})`, 'gi'), '<span class="hl">$1</span>');
+}
+
+function getFamilyBadge(family) {
+  const map = { 'טרמולוק': 'badge-thermolock', 'בטון': 'badge-concrete', 'פומיס': 'badge-pumice' };
+  return map[family] || 'badge-concrete';
+}
+
+function getStatusBadge(status) {
+  if (status === 'פעיל') return 'status-active';
+  if (status === 'אסור למכירה') return 'status-banned';
+  return 'status-inactive';
+}
+
+function getStatusLabel(status) {
+  if (status === 'פעיל') return '✓ פעיל';
+  if (status === 'אסור למכירה') return '⊘ אסור למכירה';
+  return '○ לא פעיל';
+}
+
+function dimsLabel(p) {
+  const h = Math.round(p['גובה במטר'] * 100);
+  const l = Math.round(p['אורך במטר'] * 100);
+  const t = Math.round(p['עובי במטר'] * 100);
+  return `${h}×${l}×${t} ס"מ`;
+}
+
+function filterAndSort() {
+  let result = [...DATA];
+  const q = currentSearch.trim().toLowerCase();
+
+  if (q) {
+    result = result.filter(p => {
+      return String(p['תאור']).toLowerCase().includes(q) ||
+             String(p['מק"ט']).includes(q) ||
+             String(p['תאור משפחה']).toLowerCase().includes(q);
+    });
+  }
+
+  if (currentFamily !== 'all') {
+    result = result.filter(p => p['תאור משפחה'] === currentFamily);
+  }
+
+  if (currentStatus !== 'all') {
+    result = result.filter(p => p['סטטוס'] === currentStatus);
+  }
+
+  const price = p => {
+    const v = p['מחיר מחירון בסיס'];
+    return typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.]/g,'')) || 0;
+  };
+
+  switch (currentSort) {
+    case 'price_asc': result.sort((a, b) => price(a) - price(b)); break;
+    case 'price_desc': result.sort((a, b) => price(b) - price(a)); break;
+    case 'name_asc': result.sort((a, b) => String(a['תאור']).localeCompare(String(b['תאור']), 'he')); break;
+    case 'makat_asc': result.sort((a, b) => Number(a['מק"ט']) - Number(b['מק"ט'])); break;
+  }
+
+  return result;
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('productsGrid');
+  const q = currentSearch.trim().toLowerCase();
+
+  if (data.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">לא נמצאו מוצרים</div>
+      <div class="empty-sub">נסה לשנות את מונחי החיפוש או הפילטרים</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = data.map(p => {
+    const price = typeof p['מחיר מחירון בסיס'] === 'number' ? p['מחיר מחירון בסיס'] :
+      parseFloat(String(p['מחיר מחירון בסיס']).replace(/[^0-9.]/g,''));
+    const priceStr = price > 0 ? `₪${fmt(price)}` : '—';
+    const minPrice = p['מחיר מינימום'] > 0 ? `₪${fmt(p['מחיר מינימום'])}` : '—';
+    const dims = dimsLabel(p);
+    const badgeClass = getFamilyBadge(p['תאור משפחה']);
+    const statusClass = getStatusBadge(p['סטטוס']);
+    const titleHl = highlight(p['תאור'], q);
+    const makatStr = String(p['מק"ט']);
+    const makatHl = highlight(makatStr, q);
+
+    const hasDiscount = currentDiscount > 0 && price > 0;
+    const discountedPrice = hasDiscount ? price * (1 - currentDiscount / 100) : null;
+    const discountedRow = hasDiscount ? `
+      <div class="discounted-price-row">
+        <div>
+          <div class="discounted-label">מחיר אחרי הנחה</div>
+          <div class="discounted-value">₪${fmt(discountedPrice)}</div>
+        </div>
+        <span class="discount-tag">-${currentDiscount}%</span>
+      </div>` : '';
+
+    // Shipping adder per unit/kov/mr/pallet
+    const hasShi = selectedCity != null;
+    const shiCosts = hasShi ? shippingCosts(selectedCity) : null;
+    const basePrice = hasDiscount ? discountedPrice : (price > 0 ? price : null);
+
+    function shipBlock() {
+      if (!hasShi) return '';
+      const d = shiCosts.double ? shipPerProduct(shiCosts.double.pallet, p) : null;
+      const f = shiCosts.full  ? shipPerProduct(shiCosts.full.pallet,  p) : null;
+
+      const fmtN = v => v != null ? '₪' + Math.round(v).toLocaleString('he-IL') : '—';
+
+      const trucksHtml = `
+        <div class="ship-cost-trucks">
+          <div class="ship-cost-truck">
+            <div class="ship-cost-truck-label">🚛 דאבל (${DOUBLE_PALLETS} משטחים)</div>
+            <div class="ship-cost-truck-total">${d ? '₪' + Math.round(selectedCity.double).toLocaleString('he-IL') + ' / משאית' : '—'}</div>
+          </div>
+          <div class="ship-cost-truck">
+            <div class="ship-cost-truck-label">🚚 פול (${FULL_PALLETS} משטחים)</div>
+            <div class="ship-cost-truck-total full">${f ? '₪' + Math.round(selectedCity.full).toLocaleString('he-IL') + ' / משאית' : '—'}</div>
+          </div>
+        </div>
+        <div class="ship-cost-breakdown">
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / משטח דאבל</div><div class="ship-cost-cell-val">${fmtN(d?.pallet)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / קוב דאבל</div><div class="ship-cost-cell-val">${fmtN(d?.kov)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / יחידה דאבל</div><div class="ship-cost-cell-val">${fmtN(d?.unit)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / מ"ר דאבל</div><div class="ship-cost-cell-val">${fmtN(d?.mr)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / משטח פול</div><div class="ship-cost-cell-val full">${fmtN(f?.pallet)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / קוב פול</div><div class="ship-cost-cell-val full">${fmtN(f?.kov)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / יחידה פול</div><div class="ship-cost-cell-val full">${fmtN(f?.unit)}</div></div>
+          <div class="ship-cost-cell"><div class="ship-cost-cell-label">+ / מ"ר פול</div><div class="ship-cost-cell-val full">${fmtN(f?.mr)}</div></div>
+        </div>`;
+
+      // Total per unit (discount + shipping)
+      let totalHtml = '';
+      if (basePrice != null && (d || f)) {
+        const totalD = d ? basePrice + d.unit : null;
+        const totalF = f ? basePrice + f.unit : null;
+        totalHtml = `
+        <div class="total-cost-row">
+          <div class="total-cost-label">💰 סה"כ ליחידה${hasDiscount ? ' (אחרי הנחה + הובלה)' : ' (+ הובלה)'}</div>
+          <div class="total-cost-trucks">
+            ${totalD != null ? `<div class="total-cost-item"><div class="total-cost-item-lbl">דאבל</div><div class="total-cost-item-val">₪${fmt(totalD)}</div></div>` : ''}
+            ${totalF != null ? `<div class="total-cost-item"><div class="total-cost-item-lbl">פול</div><div class="total-cost-item-val">₪${fmt(totalF)}</div></div>` : ''}
+          </div>
+        </div>`;
+      }
+
+      return `
+        <div class="ship-cost-row">
+          <div class="ship-cost-row-header">🚛 תוספת הובלה — ${selectedCity.city}</div>
+          ${trucksHtml}
+        </div>
+        ${totalHtml}`;
+    }
+
+    return `<div class="product-card" onclick="openModal(${p['מק"ט']})">
+      <div class="card-header">
+        <div>
+          <div class="card-title">${titleHl}</div>
+          <div class="card-makat">מק"ט: ${makatHl}</div>
+          <span class="status-badge ${statusClass}">${getStatusLabel(p['סטטוס'])}</span>
+        </div>
+        <div>
+          <span class="family-badge ${badgeClass}">${p['תאור משפחה']}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="price-row">
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:3px">${hasDiscount ? '<s style="opacity:0.5">מחיר מחירון</s>' : 'מחיר מחירון'}</div>
+            <div class="price-main" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.45;font-size:16px' : ''}">${priceStr}<span>/ יחידה</span></div>
+          </div>
+          <div style="text-align:left">
+            <div class="price-min-label">מחיר מינימום</div>
+            <div class="price-min-val">${minPrice}</div>
+          </div>
+        </div>
+        ${discountedRow}
+        <div class="dims-row" style="margin-top:${hasDiscount?'8px':'0'}">
+          <div class="dim-chip">📐 <strong>${dims}</strong></div>
+          <div class="dim-chip">📦 <strong>${p['כמות במשטח']}</strong> יח'/משטח</div>
+        </div>
+        <div class="card-details">
+          <div class="detail-item">
+            <span class="detail-label">מחיר לקוב</span>
+            <span class="detail-value">₪${Math.round(p['מחיר בסיס לקוב']).toLocaleString()}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">מחיר למ"ר</span>
+            <span class="detail-value">₪${Math.round(p['מחיר בסיס למ"ר']).toLocaleString()}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">משקל יחידה</span>
+            <span class="detail-value">${fmt(p['משקל יחידה בק"ג'])} ק"ג</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">יחידות במ"ק</span>
+            <span class="detail-value">${fmt(p['יחידות במ"ק'], 1)}</span>
+          </div>
+        </div>
+        ${shipBlock()}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openModal(makat) {
+  const p = DATA.find(x => x['מק"ט'] === makat);
+  if (!p) return;
+
+  const price = typeof p['מחיר מחירון בסיס'] === 'number' ? p['מחיר מחירון בסיס'] :
+    parseFloat(String(p['מחיר מחירון בסיס']).replace(/[^0-9.]/g,''));
+
+  const hasDiscount = currentDiscount > 0 && price > 0;
+  const discountedPrice = hasDiscount ? price * (1 - currentDiscount / 100) : null;
+  const discountedKov = hasDiscount ? Math.round(p['מחיר בסיס לקוב'] * (1 - currentDiscount / 100)) : null;
+  const discountedMishтach = hasDiscount ? Math.round(p['מחיר בסיס למשטח'] * (1 - currentDiscount / 100)) : null;
+  const discountedMR = hasDiscount ? Math.round(p['מחיר בסיס למ"ר'] * (1 - currentDiscount / 100)) : null;
+
+  const discountBanner = hasDiscount ? `
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">🏷️</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:#065f46">הנחה גלובלית פעילה</div>
+        <div style="font-size:13px;color:#047857;margin-top:2px">מחירים מחושבים עם הנחה של <strong>${currentDiscount}%</strong></div>
+      </div>
+    </div>` : '';
+
+  document.getElementById('modalTitle').textContent = p['תאור'];
+  document.getElementById('modalMakat').textContent = `מק"ט: ${p['מק"ט']} | משפחה: ${p['תאור משפחה']} | סטטוס: ${p['סטטוס']}`;
+
+  document.getElementById('modalBody').innerHTML = `
+    ${discountBanner}
+    <div class="modal-section">
+      <div class="modal-section-title">💰 מחירים</div>
+      <div class="modal-grid">
+        <div class="modal-item" style="${hasDiscount ? 'border-color:#fca5a5' : ''}">
+          <div class="modal-item-label">מחיר מחירון</div>
+          <div class="modal-item-value big" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.45;font-size:15px' : ''}">₪${price > 0 ? fmt(price) : '—'}</div>
+          ${hasDiscount ? `<div style="font-size:18px;font-weight:800;color:var(--green);direction:ltr;margin-top:3px">₪${fmt(discountedPrice)}</div>` : ''}
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">מחיר מינימום</div>
+          <div class="modal-item-value big" style="color:var(--green)">₪${fmt(p['מחיר מינימום'])}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">מחיר לקוב</div>
+          <div class="modal-item-value" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.4;font-size:12px' : ''}">₪${Math.round(p['מחיר בסיס לקוב']).toLocaleString()}</div>
+          ${hasDiscount ? `<div style="font-weight:700;color:var(--green);direction:ltr">₪${discountedKov.toLocaleString()}</div>` : ''}
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">מחיר למשטח</div>
+          <div class="modal-item-value" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.4;font-size:12px' : ''}">₪${Math.round(p['מחיר בסיס למשטח']).toLocaleString()}</div>
+          ${hasDiscount ? `<div style="font-weight:700;color:var(--green);direction:ltr">₪${discountedMishтach.toLocaleString()}</div>` : ''}
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">מחיר למ"ר</div>
+          <div class="modal-item-value" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.4;font-size:12px' : ''}">₪${Math.round(p['מחיר בסיס למ"ר']).toLocaleString()}</div>
+          ${hasDiscount ? `<div style="font-weight:700;color:var(--green);direction:ltr">₪${discountedMR.toLocaleString()}</div>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">📐 מידות ומשקל</div>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <div class="modal-item-label">גובה</div>
+          <div class="modal-item-value">${Math.round(p['גובה במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">אורך</div>
+          <div class="modal-item-value">${Math.round(p['אורך במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">עובי</div>
+          <div class="modal-item-value">${Math.round(p['עובי במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל יחידה</div>
+          <div class="modal-item-value">${fmt(p['משקל יחידה בק"ג'])} ק"ג</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל לקוב</div>
+          <div class="modal-item-value">${Number(p['משקל לקוב']).toLocaleString()} ק"ג</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל למשטח</div>
+          <div class="modal-item-value">${Number(p['משקל למשטח']).toLocaleString()} ק"ג</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">📦 כמויות</div>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <div class="modal-item-label">כמות במשטח</div>
+          <div class="modal-item-value">${p['כמות במשטח']} יח'</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות במ"ק</div>
+          <div class="modal-item-value">${fmt(p['יחידות במ"ק'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות במ"ר</div>
+          <div class="modal-item-value">${fmt(p['יחידות במ"ר'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות בטון</div>
+          <div class="modal-item-value">${fmt(p['יחידות בטון'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">קוב במשטח</div>
+          <div class="modal-item-value">${fmt(p['קוב במשטח'])} מ"ק</div>
+        </div>
+      </div>
+    </div>
+    ${(() => {
+      if (!selectedCity) return '';
+      const shiCosts = shippingCosts(selectedCity);
+      const d = shiCosts.double ? shipPerProduct(shiCosts.double.pallet, p) : null;
+      const f = shiCosts.full  ? shipPerProduct(shiCosts.full.pallet,  p) : null;
+      const fmtN = v => v != null ? '₪' + Math.round(v).toLocaleString('he-IL') : '—';
+      const baseP = hasDiscount ? discountedPrice : (price > 0 ? price : null);
+      const baseKov = hasDiscount ? discountedKov : (p['מחיר בסיס לקוב'] > 0 ? p['מחיר בסיס לקוב'] : null);
+      const baseMR = hasDiscount ? discountedMR : (p['מחיר בסיס למ"ר'] > 0 ? p['מחיר בסיס למ"ר'] : null);
+
+      const shiRows = [
+        { label:'/ יחידה דאבל', val: d?.unit, valF: f?.unit, labelF:'/ יחידה פול' },
+        { label:'/ משטח דאבל', val: d?.pallet, valF: f?.pallet, labelF:'/ משטח פול' },
+        { label:'/ קוב דאבל', val: d?.kov, valF: f?.kov, labelF:'/ קוב פול' },
+        { label:'/ מ"ר דאבל', val: d?.mr, valF: f?.mr, labelF:'/ מ"ר פול' },
+      ];
+
+      const totalItems = [];
+      if (baseP != null) {
+        if (d) totalItems.push({ lbl:'סה"כ / יחידה דאבל', val: baseP + d.unit, cls:'color:#4338ca' });
+        if (f) totalItems.push({ lbl:'סה"כ / יחידה פול', val: baseP + f.unit, cls:'color:#b45309' });
+        if (d && baseKov) totalItems.push({ lbl:'סה"כ / קוב דאבל', val: baseKov + d.kov, cls:'color:#4338ca' });
+        if (f && baseKov) totalItems.push({ lbl:'סה"כ / קוב פול', val: baseKov + f.kov, cls:'color:#b45309' });
+      }
+
+      return `
+      <div class="modal-section">
+        <div class="modal-section-title">🚛 הובלה — ${selectedCity.city} (טווח ${selectedCity.range})</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div class="modal-item" style="border-color:#a5b4fc">
+            <div class="modal-item-label">🚛 משאית דאבל (${DOUBLE_PALLETS} משטחים)</div>
+            <div class="modal-item-value" style="color:#4338ca">${d ? '₪' + Math.round(selectedCity.double).toLocaleString('he-IL') : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">₪${d ? Math.round(d.pallet).toLocaleString('he-IL') : '—'} / משטח</div>
+          </div>
+          <div class="modal-item" style="border-color:#fcd34d">
+            <div class="modal-item-label">🚚 משאית פול (${FULL_PALLETS} משטחים)</div>
+            <div class="modal-item-value" style="color:#b45309">${f ? '₪' + Math.round(selectedCity.full).toLocaleString('he-IL') : '—'}</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">₪${f ? Math.round(f.pallet).toLocaleString('he-IL') : '—'} / משטח</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px">תוספת הובלה לפי יחידת מידה</div>
+        <div class="modal-grid">
+          ${shiRows.map(row => `
+            <div class="modal-item" style="border-color:#c7d2fe">
+              <div class="modal-item-label">${row.label}</div>
+              <div class="modal-item-value" style="color:#4338ca;font-size:14px">${fmtN(row.val)}</div>
+            </div>
+            <div class="modal-item" style="border-color:#fde68a">
+              <div class="modal-item-label">${row.labelF}</div>
+              <div class="modal-item-value" style="color:#b45309;font-size:14px">${fmtN(row.valF)}</div>
+            </div>`).join('')}
+        </div>
+        ${totalItems.length ? `
+        <div style="margin-top:12px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:10px;padding:14px 16px">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);margin-bottom:10px;text-transform:uppercase;letter-spacing:.6px">💰 סה"כ ${hasDiscount?'(הנחה + הובלה)':'(+ הובלה)'}</div>
+          <div style="display:grid;grid-template-columns:repeat(${Math.min(totalItems.length,2)},1fr);gap:8px">
+            ${totalItems.map(t => `
+            <div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px">
+              <div style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:600">${t.lbl}</div>
+              <div style="font-size:18px;font-weight:800;color:white;direction:ltr;margin-top:3px">₪${Math.round(t.val).toLocaleString('he-IL')}</div>
+            </div>`).join('')}
+          </div>
+        </div>` : ''}
+      </div>`;
+    })()}`;
+
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+function updateUI() {
+  const filtered = filterAndSort();
+  renderCards(filtered);
+  document.getElementById('totalCount').textContent = DATA.length;
+  document.getElementById('shownCount').textContent = filtered.length;
+  document.getElementById('resultsCount').innerHTML = `מציג <strong>${filtered.length}</strong> מתוך ${DATA.length} מוצרים`;
+}
+
+// Search
+document.getElementById('searchInput').addEventListener('input', function() {
+  currentSearch = this.value;
+  document.getElementById('clearBtn').classList.toggle('visible', this.value.length > 0);
+  updateUI();
+});
+
+document.getElementById('clearBtn').addEventListener('click', function() {
+  document.getElementById('searchInput').value = '';
+  currentSearch = '';
+  this.classList.remove('visible');
+  updateUI();
+});
+
+// Family chips
+document.querySelectorAll('[data-family]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-family]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentFamily = this.dataset.family;
+    updateUI();
+  });
+});
+
+// Status chips
+document.querySelectorAll('[data-status]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentStatus = this.dataset.status;
+    updateUI();
+  });
+});
+
+// Sort
+document.getElementById('sortSelect').addEventListener('change', function() {
+  currentSort = this.value;
+  updateUI();
+});
+
+// View toggle
+document.getElementById('gridViewBtn').addEventListener('click', function() {
+  isListView = false;
+  document.getElementById('productsGrid').classList.remove('list-view');
+  this.classList.add('active');
+  document.getElementById('listViewBtn').classList.remove('active');
+});
+
+document.getElementById('listViewBtn').addEventListener('click', function() {
+  isListView = true;
+  document.getElementById('productsGrid').classList.add('list-view');
+  this.classList.add('active');
+  document.getElementById('gridViewBtn').classList.remove('active');
+});
+
+// Modal
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalBackdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Discount
+const discountInput = document.getElementById('discountInput');
+const discountError = document.getElementById('discountError');
+const discountResult = document.getElementById('discountResult');
+const discountPct = document.getElementById('discountPct');
+const discountClear = document.getElementById('discountClear');
+
+discountInput.addEventListener('input', function() {
+  const raw = this.value.trim();
+
+  if (raw === '' || raw === null) {
+    currentDiscount = 0;
+    discountInput.classList.remove('error');
+    discountError.classList.remove('visible');
+    discountResult.classList.remove('visible');
+    discountClear.classList.remove('visible');
+    updateUI();
+    return;
+  }
+
+  const val = parseFloat(raw);
+
+  if (isNaN(val) || val < 0 || val > 100) {
+    discountInput.classList.add('error');
+    discountError.classList.add('visible');
+    discountResult.classList.remove('visible');
+    discountClear.classList.remove('visible');
+    currentDiscount = 0;
+    updateUI();
+    return;
+  }
+
+  discountInput.classList.remove('error');
+  discountError.classList.remove('visible');
+  currentDiscount = val;
+
+  if (val > 0) {
+    discountPct.textContent = val % 1 === 0 ? val : val.toFixed(1);
+    discountResult.classList.add('visible');
+    discountClear.classList.add('visible');
+  } else {
+    discountResult.classList.remove('visible');
+    discountClear.classList.remove('visible');
+  }
+  updateUI();
+});
+
+discountClear.addEventListener('click', function() {
+  discountInput.value = '';
+  currentDiscount = 0;
+  discountInput.classList.remove('error');
+  discountError.classList.remove('visible');
+  discountResult.classList.remove('visible');
+  discountClear.classList.remove('visible');
+  updateUI();
+});
+
+// Shipping Data
+const SHIPPING_DATA = [{"city":"בני עי\"ש","range":"א'","double":540,"full":1080,"km":3},{"city":"כנות","range":"א'","double":540,"full":1080,"km":1},{"city":"ביצרון","range":"א'","double":540,"full":1080,"km":5},{"city":"חצב","range":"א'","double":540,"full":1080,"km":5},{"city":"נווה מבטח","range":"א'","double":540,"full":1080,"km":5},{"city":"גדרה","range":"א'","double":540,"full":1080,"km":6},{"city":"בת חצור","range":"א'","double":540,"full":1080,"km":7},{"city":"גן יבנה","range":"א'","double":540,"full":1080,"km":7},{"city":"גני טל","range":"א'","double":540,"full":1080,"km":7},{"city":"חפץ חיים","range":"א'","double":540,"full":1080,"km":7},{"city":"חצור-אשדוד","range":"א'","double":540,"full":1080,"km":7},{"city":"בית חלקיה","range":"א'","double":540,"full":1080,"km":8},{"city":"בני ראם","range":"א'","double":540,"full":1080,"km":8},{"city":"מחנה מרים","range":"א'","double":540,"full":1080,"km":8},{"city":"מישר","range":"א'","double":540,"full":1080,"km":8},{"city":"אחווה","range":"א'","double":540,"full":1080,"km":9},{"city":"בית רבן","range":"א'","double":540,"full":1080,"km":9},{"city":"קדרון","range":"א'","double":540,"full":1080,"km":9},{"city":"ינון","range":"א'","double":540,"full":1080,"km":10},{"city":"כפר אביב","range":"א'","double":540,"full":1080,"km":10},{"city":"כפר אחים","range":"א'","double":540,"full":1080,"km":10},{"city":"כפר הרי\"ף","range":"א'","double":540,"full":1080,"km":10},{"city":"כרם יבנה )ישיבה(","range":"א'","double":540,"full":1080,"km":10},{"city":"משגב דב","range":"א'","double":540,"full":1080,"km":10},{"city":"עשרת","range":"א'","double":540,"full":1080,"km":10},{"city":"קבוצת יבנה","range":"א'","double":540,"full":1080,"km":10},{"city":"רבדים","range":"א'","double":540,"full":1080,"km":10},{"city":"שדמה","range":"א'","double":540,"full":1080,"km":10},{"city":"תלמי יחיאל","range":"א'","double":540,"full":1080,"km":10},{"city":"כפר מרדכי","range":"א'","double":540,"full":1080,"km":11},{"city":"ערוגות","range":"א'","double":540,"full":1080,"km":11},{"city":"בית אלעזרי","range":"א'","double":540,"full":1080,"km":12},{"city":"מחנה תל נוף","range":"א'","double":540,"full":1080,"km":12},{"city":"קרית מלאכי","range":"א'","double":540,"full":1080,"km":12},{"city":"בניה","range":"א'","double":540,"full":1080,"km":13},{"city":"גן הדרום","range":"א'","double":540,"full":1080,"km":13},{"city":"יד בנימין","range":"א'","double":540,"full":1080,"km":13},{"city":"ניר גלים","range":"א'","double":540,"full":1080,"km":13},{"city":"קרית עקרון","range":"א'","double":540,"full":1080,"km":13},{"city":"תימורים","range":"א'","double":540,"full":1080,"km":13},{"city":"אביגדור","range":"א'","double":540,"full":1080,"km":14},{"city":"בני דרום","range":"א'","double":540,"full":1080,"km":14},{"city":"גבעת ברנר","range":"א'","double":540,"full":1080,"km":14},{"city":"כפר ביל\"ו","range":"א'","double":540,"full":1080,"km":14},{"city":"עזריקם","range":"א'","double":540,"full":1080,"km":14},{"city":"אורות","range":"א'","double":540,"full":1080,"km":15},{"city":"אל-עזי","range":"א'","double":540,"full":1080,"km":15},{"city":"באר טוביה","range":"א'","double":540,"full":1080,"km":15},{"city":"גן שלמה","range":"א'","double":540,"full":1080,"km":15},{"city":"נצר חזני","range":"א'","double":540,"full":1080,"km":15},{"city":"צופיה","range":"א'","double":540,"full":1080,"km":15},{"city":"גני יוחנן","range":"א'","double":540,"full":1080,"km":16},{"city":"כפר ורבורג","range":"א'","double":540,"full":1080,"km":16},{"city":"סתריה","range":"א'","double":540,"full":1080,"km":16},{"city":"גפן","range":"א'","double":540,"full":1080,"km":16.5},{"city":"אמונים","range":"א'","double":540,"full":1080,"km":17},{"city":"בן זכאי","range":"א'","double":540,"full":1080,"km":17},{"city":"יסודות","range":"א'","double":540,"full":1080,"km":17},{"city":"כפר מנחם","range":"א'","double":540,"full":1080,"km":17},{"city":"מרכז שפירא","range":"א'","double":540,"full":1080,"km":17},{"city":"סער","range":"מיוחדת 3","double":null,"full":2900,"km":17},{"city":"קדמה","range":"א'","double":540,"full":540,"km":17},{"city":"רחובות","range":"א'","double":540,"full":540,"km":17},{"city":"שפיר","range":"א'","double":540,"full":540,"km":17},{"city":"אירוס","range":"א'","double":540,"full":540,"km":18},{"city":"אשדוד","range":"א'","double":540,"full":540,"km":18},{"city":"גבעתי","range":"א'","double":540,"full":540,"km":18},{"city":"גני הדר","range":"א'","double":540,"full":540,"km":18},{"city":"יציץ","range":"א'","double":540,"full":540,"km":18},{"city":"ניר בנים","range":"א'","double":540,"full":540,"km":18},{"city":"נען","range":"א'","double":540,"full":540,"km":18},{"city":"עין צורים","range":"א'","double":540,"full":540,"km":18},{"city":"רמות מאיר","range":"א'","double":540,"full":540,"km":18},{"city":"תירוש","range":"א'","double":540,"full":540,"km":18},{"city":"גאליה","range":"א'","double":540,"full":540,"km":19},{"city":"זרחיה","range":"א'","double":540,"full":540,"km":19},{"city":"משואות יצחק","range":"א'","double":540,"full":540,"km":19},{"city":"בית גמליאל","range":"א'","double":540,"full":540,"km":20},{"city":"בית עזרא","range":"א'","double":540,"full":540,"km":20},{"city":"ורדון","range":"א'","double":540,"full":540,"km":20},{"city":"ישרש","range":"א'","double":540,"full":540,"km":20},{"city":"מזכרת בתיה","range":"א'","double":540,"full":540,"km":20},{"city":"מנוחה","range":"א'","double":540,"full":540,"km":20},{"city":"עזר","range":"א'","double":540,"full":540,"km":20},{"city":"שדה עוזיהו","range":"א'","double":540,"full":540,"km":20},{"city":"שתולים","range":"א'","double":540,"full":540,"km":20},{"city":"חולדה","range":"א'","double":540,"full":540,"km":21},{"city":"טל שחר","range":"ב'","double":540,"full":540,"km":21},{"city":"נחלה","range":"א'","double":540,"full":540,"km":21},{"city":"סגולה","range":"א'","double":540,"full":540,"km":21},{"city":"בית עובד","range":"ב'","double":660,"full":1320,"km":22},{"city":"בקוע","range":"ב'","double":660,"full":1320,"km":22},{"city":"גיבתון","range":"א'","double":540,"full":540,"km":22},{"city":"גיזו","range":"ב'","double":660,"full":1320,"km":22},{"city":"זבדיאל","range":"ב'","double":660,"full":1320,"km":22},{"city":"משמר דוד","range":"ב'","double":660,"full":1320,"km":22},{"city":"אלומה","range":"ב'","double":660,"full":1320,"km":23},{"city":"הראל","range":"ב'","double":660,"full":1320,"km":23},{"city":"כפר הנגיד","range":"א'","double":540,"full":540,"km":23},{"city":"צלפון","range":"ב'","double":660,"full":1320,"km":23},{"city":"רווחה","range":"ב'","double":660,"full":1320,"km":23},{"city":"שדות מיכה","range":"ב'","double":660,"full":1320,"km":23},{"city":"קוממיות","range":"ב'","double":660,"full":1320,"km":24},{"city":"עיינות","range":"ב'","double":660,"full":1320,"km":25},{"city":"גת )קיבוץ(","range":"ב'","double":660,"full":1320,"km":26},{"city":"כרמי יוסף","range":"ב'","double":660,"full":1320,"km":26},{"city":"נחשון","range":"ב'","double":660,"full":1320,"km":26},{"city":"ניצן ב'","range":"ב'","double":660,"full":1320,"km":26},{"city":"זכריה","range":"ב'","double":660,"full":1320,"km":27},{"city":"כפר אוריה","range":"ב'","double":660,"full":1320,"km":27},{"city":"ניצן","range":"ב'","double":660,"full":1320,"km":27},{"city":"ניצנים","range":"ב'","double":660,"full":1320,"km":27},{"city":"קרית גת","range":"ב'","double":660,"full":1320,"km":27},{"city":"שדה יואב","range":"ב'","double":660,"full":1320,"km":27},{"city":"בית עוזיאל","range":"ב'","double":660,"full":1320,"km":28},{"city":"הודיה","range":"ב'","double":660,"full":1320,"km":28},{"city":"יבנה","range":"א'","double":540,"full":540,"km":28},{"city":"נווה שלום","range":"ב'","double":660,"full":1320,"km":28},{"city":"פדיה","range":"ב'","double":660,"full":1320,"km":28},{"city":"פתחיה","range":"ב'","double":660,"full":1320,"km":28},{"city":"תעוז","range":"ב'","double":660,"full":1320,"km":28},{"city":"אחיסמך","range":"ב'","double":660,"full":1320,"km":29},{"city":"כוכב מיכאל","range":"ב'","double":660,"full":1320,"km":29},{"city":"ניר ישראל","range":"ב'","double":660,"full":1320,"km":29},{"city":"עוזה","range":"ב'","double":660,"full":1320,"km":29},{"city":"איתן","range":"ב'","double":660,"full":1320,"km":30},{"city":"בת הדר","range":"ב'","double":660,"full":1320,"km":30},{"city":"גזר","range":"ב'","double":660,"full":1320,"km":30},{"city":"גלאון","range":"ב'","double":660,"full":1320,"km":30},{"city":"גן שורק","range":"ב'","double":660,"full":1320,"km":30},{"city":"יד נתן","range":"ב'","double":660,"full":1320,"km":30},{"city":"כפר סילבר","range":"ב'","double":660,"full":1320,"km":30},{"city":"לוד","range":"ב'","double":660,"full":1320,"km":30},{"city":"נטעים","range":"ב'","double":660,"full":1320,"km":30},{"city":"רמלה","range":"ב'","double":660,"full":1320,"km":30},{"city":"תרום","range":"ב'","double":660,"full":1320,"km":30},{"city":"בית חנן","range":"ב'","double":660,"full":1320,"km":31},{"city":"גבעת ישעיהו","range":"ב'","double":660,"full":1320,"km":31},{"city":"נגבה","range":"ב'","double":660,"full":1320,"km":31},{"city":"נהורה","range":"ב'","double":660,"full":1320,"km":31},{"city":"נוגה","range":"ב'","double":660,"full":1320,"km":31},{"city":"שריגים )לי-און(","range":"ב'","double":660,"full":1320,"km":31},{"city":"אשתאול","range":"ב'","double":660,"full":1320,"km":32},{"city":"גינתון","range":"ב'","double":660,"full":1320,"km":32},{"city":"יד רמב\"ם","range":"ב'","double":660,"full":1320,"km":32},{"city":"נתיב הל\"ה","range":"ב'","double":660,"full":1320,"km":32},{"city":"באר גנים","range":"ב'","double":660,"full":1320,"km":33},{"city":"בן שמן )כפר נוער(","range":"ב'","double":660,"full":1320,"km":33},{"city":"כפר בן נון","range":"ב'","double":660,"full":1320,"km":33},{"city":"נס ציונה","range":"ב'","double":660,"full":1320,"km":33},{"city":"צפרירים","range":"ב'","double":660,"full":1320,"km":33},{"city":"אדרת","range":"ב'","double":660,"full":1320,"km":34},{"city":"איתנים","range":"ב'","double":660,"full":1320,"km":34},{"city":"בית חשמונאי","range":"ב'","double":660,"full":1320,"km":34},{"city":"בית שמש","range":"ב'","double":660,"full":1320,"km":34},{"city":"בת ים","range":"ב'","double":660,"full":1320,"km":34},{"city":"כרם בן שמן","range":"ב'","double":660,"full":1320,"km":34},{"city":"מצליח","range":"ב'","double":660,"full":1320,"km":34},{"city":"משמר איילון","range":"ב'","double":660,"full":1320,"km":34},{"city":"משען","range":"ב'","double":660,"full":1320,"km":34},{"city":"עוצם","range":"ב'","double":660,"full":1320,"km":34},{"city":"עזריה","range":"ב'","double":660,"full":1320,"km":34},{"city":"שחר","range":"ב'","double":660,"full":1320,"km":34},{"city":"בית שקמה","range":"ב'","double":660,"full":1320,"km":35},{"city":"ברכיה","range":"ב'","double":660,"full":1320,"km":35},{"city":"ישעי","range":"ב'","double":660,"full":1320,"km":35},{"city":"כפר שמואל","range":"ב'","double":660,"full":1320,"km":35},{"city":"צרעה","range":"ב'","double":660,"full":1320,"km":35},{"city":"אשקלון","range":"ב'","double":660,"full":1320,"km":36},{"city":"חדיד","range":"ב'","double":660,"full":1320,"km":36},{"city":"מודיעין-מכבים-רעות","range":"ב'","double":660,"full":1320,"km":36},{"city":"נחם","range":"ב'","double":660,"full":1320,"km":36},{"city":"פלמחים","range":"ב'","double":660,"full":1320,"km":36},{"city":"שדה משה","range":"ב'","double":660,"full":1320,"km":36},{"city":"בן שמן )מושב(","range":"ב'","double":660,"full":1320,"km":37},{"city":"גיאה","range":"ב'","double":660,"full":1320,"km":37},{"city":"גנות","range":"ב'","double":660,"full":1320,"km":37},{"city":"מחסיה","range":"ב'","double":660,"full":1320,"km":37},{"city":"ראשון לציון","range":"ב'","double":660,"full":1320,"km":37},{"city":"באר יעקב","range":"ב'","double":660,"full":1320,"km":38},{"city":"בית דגן","range":"ב'","double":660,"full":1320,"km":38},{"city":"גבעת שמש","range":"ב'","double":660,"full":1320,"km":38},{"city":"גמזו","range":"ב'","double":660,"full":1320,"km":38},{"city":"חולון","range":"ב'","double":660,"full":1320,"km":38},{"city":"כפר דניאל","range":"ב'","double":660,"full":1320,"km":38},{"city":"מבקיעים","range":"ב'","double":660,"full":1320,"km":38},{"city":"ניר ח\"ן","range":"ב'","double":660,"full":1320,"km":38},{"city":"תלמי יפה","range":"ב'","double":660,"full":1320,"km":38},{"city":"זיתן","range":"ב'","double":660,"full":1320,"km":39},{"city":"נוף איילון","range":"ב'","double":660,"full":1320,"km":39},{"city":"נצר סרני","range":"ב'","double":660,"full":1320,"km":39},{"city":"שלווה","range":"ב'","double":660,"full":1320,"km":39},{"city":"שעלבים","range":"ב'","double":660,"full":1320,"km":39},{"city":"בית נחמיה","range":"ב'","double":660,"full":1320,"km":40},{"city":"גברעם","range":"ב'","double":660,"full":1320,"km":40},{"city":"זוהר","range":"ב'","double":660,"full":1320,"km":40},{"city":"זנוח","range":"ב'","double":660,"full":1320,"km":40},{"city":"חלץ","range":"ב'","double":660,"full":1320,"km":40},{"city":"חמד","range":"ב'","double":660,"full":1320,"km":40},{"city":"כפר טרומן","range":"ב'","double":660,"full":1320,"km":40},{"city":"מקווה ישראל","range":"ב'","double":660,"full":1320,"km":40},{"city":"שדה דוד","range":"ב'","double":660,"full":1320,"km":40},{"city":"שוהם","range":"ב'","double":660,"full":1320,"km":40},{"city":"שורש","range":"מיוחדת 1","double":1214,"full":1848,"km":40},{"city":"אזור","range":"ב'","double":660,"full":1320,"km":41},{"city":"יד מרדכי","range":"ב'","double":660,"full":1320,"km":41},{"city":"כסלון","range":"מיוחדת 1","double":1214,"full":1848,"km":41},{"city":"כפר חב\"ד","range":"ב'","double":660,"full":1320,"km":41},{"city":"לפיד","range":"ב'","double":660,"full":1320,"km":41},{"city":"ברקת","range":"ב'","double":660,"full":1320,"km":42},{"city":"גבעת כ\"ח","range":"ב'","double":660,"full":1320,"km":42},{"city":"גני מודיעין","range":"ב'","double":660,"full":1320,"km":42},{"city":"נועם","range":"ב'","double":660,"full":1320,"km":42},{"city":"עגור","range":"ב'","double":660,"full":1320,"km":42},{"city":"ארז","range":"ב'","double":660,"full":1320,"km":43},{"city":"בית עריף","range":"ב'","double":660,"full":1320,"km":43},{"city":"ברור חיל","range":"ב'","double":660,"full":1320,"km":43},{"city":"טירת יהודה","range":"ב'","double":660,"full":1320,"km":43},{"city":"כפר רות","range":"ב'","double":660,"full":1320,"km":43},{"city":"כרמיה","range":"ב'","double":660,"full":1320,"km":43},{"city":"מבוא מודיעים","range":"ב'","double":660,"full":1320,"km":43},{"city":"נווה מיכאל","range":"ב'","double":660,"full":1320,"km":43},{"city":"ניר צבי","range":"ב'","double":660,"full":1320,"km":43},{"city":"תלמים","range":"ב'","double":660,"full":1320,"km":43},{"city":"אביעזר","range":"ב'","double":660,"full":1320,"km":44},{"city":"אור הנר","range":"ב'","double":660,"full":1320,"km":44},{"city":"בית גוברין","range":"ב'","double":660,"full":1320,"km":44},{"city":"גבעת שמואל","range":"ב'","double":660,"full":1320,"km":44},{"city":"גבעתיים","range":"ב'","double":660,"full":1320,"km":44},{"city":"זיקים","range":"ב'","double":660,"full":1320,"km":44},{"city":"יגל","range":"ב'","double":660,"full":1320,"km":44},{"city":"יהוד-מונוסון","range":"ב'","double":660,"full":1320,"km":44},{"city":"כפר האורנים","range":"ב'","double":660,"full":1320,"km":44},{"city":"מבוא חורון","range":"ב'","double":660,"full":1320,"km":44},{"city":"נתיב העשרה","range":"ב'","double":660,"full":1320,"km":44},{"city":"אחיעזר","range":"ב'","double":660,"full":1320,"km":45},{"city":"בית מאיר","range":"ב'","double":660,"full":1320,"km":45},{"city":"חשמונאים","range":"ב'","double":660,"full":1320,"km":45},{"city":"מסילת ציון","range":"ב'","double":660,"full":1320,"km":45},{"city":"משמר השבעה","range":"ב'","double":660,"full":1320,"km":45},{"city":"רמת רזיאל","range":"מיוחדת 1","double":1214,"full":1848,"km":45},{"city":"שילת","range":"ב'","double":660,"full":1320,"km":45},{"city":"בית נקופה","range":"מיוחדת 1","double":1214,"full":1848,"km":46},{"city":"בני עטרות","range":"ב'","double":660,"full":1320,"km":46},{"city":"מוצא עילית","range":"מיוחדת 1","double":1214,"full":1848,"km":46},{"city":"ניר עם","range":"ב'","double":660,"full":1320,"km":46},{"city":"אבן שמואל","range":"ב'","double":660,"full":1320,"km":47},{"city":"בית קמה","range":"ג'","double":864,"full":1728,"km":47},{"city":"בני ברק","range":"ב'","double":660,"full":1320,"km":47},{"city":"בר גיורא","range":"מיוחדת 1","double":1214,"full":1848,"km":47},{"city":"כפר זוהרים","range":"ב'","double":660,"full":1320,"km":47},{"city":"מטע","range":"מיוחדת 1","double":1214,"full":1848,"km":47},{"city":"סביון","range":"ב'","double":660,"full":1320,"km":47},{"city":"צפריה","range":"ב'","double":660,"full":1320,"km":47},{"city":"שדרות","range":"ב'","double":660,"full":1320,"km":47},{"city":"לכיש","range":"ב'","double":660,"full":1320,"km":48},{"city":"מבוא ביתר","range":"ב'","double":660,"full":1320,"km":48},{"city":"מבשרת ציון","range":"מיוחדת 1","double":1214,"full":1848,"km":48},{"city":"מודיעין עילית","range":"ב'","double":660,"full":1320,"km":48},{"city":"נס הרים","range":"מיוחדת 1","double":1214,"full":1848,"km":48},{"city":"צור הדסה","range":"מיוחדת 1","double":1214,"full":1848,"km":48},{"city":"שואבה","range":"מיוחדת 1","double":1214,"full":1848,"km":48},{"city":"אחוזם","range":"ב'","double":660,"full":1320,"km":49},{"city":"בית ניר","range":"ב'","double":660,"full":1320,"km":49},{"city":"אלון שבות","range":"מיוחדת 2","double":null,"full":2300,"km":50},{"city":"אליאב","range":"ג'","double":864,"full":1728,"km":50},{"city":"אלעד","range":"ג'","double":864,"full":1728,"km":50},{"city":"אמציה","range":"ג'","double":864,"full":1728,"km":50},{"city":"בארות יצחק","range":"ב'","double":660,"full":1320,"km":50},{"city":"גבים","range":"ג'","double":864,"full":1728,"km":50},{"city":"גבעת יערים","range":"מיוחדת 1","double":1214,"full":1848,"km":50},{"city":"ניל\"י","range":"ג'","double":864,"full":1728,"km":50},{"city":"קרית יערים","range":"מיוחדת 1","double":1214,"full":1848,"km":50},{"city":"תל אביב - יפו","range":"ג'","double":864,"full":1728,"km":50},{"city":"אור יהודה","range":"ב'","double":660,"full":1320,"km":51},{"city":"איבים","range":"ב'","double":660,"full":1320,"km":51},{"city":"בית זית","range":"מיוחדת 1","double":1214,"full":1848,"km":51},{"city":"דורות","range":"ג'","double":864,"full":1728,"km":51},{"city":"נווה אילן","range":"מיוחדת 1","double":1214,"full":1848,"km":51},{"city":"אבו גוש","range":"מיוחדת 1","double":1214,"full":1848,"km":52},{"city":"ביתר עילית","range":"מיוחדת 1","double":1214,"full":1848,"km":52},{"city":"גת רימון","range":"ב'","double":660,"full":1320,"km":52},{"city":"ידידה","range":"מיוחדת 1","double":1214,"full":1848,"km":52},{"city":"מפלסים","range":"ג'","double":864,"full":1728,"km":52},{"city":"נחושה","range":"ב'","double":660,"full":1320,"km":52},{"city":"רינתיה","range":"ב'","double":660,"full":1320,"km":52},{"city":"רמת גן","range":"ב'","double":660,"full":1320,"km":52},{"city":"תל השומר","range":"ב'","double":660,"full":1320,"km":52},{"city":"לוזית","range":"ב'","double":660,"full":1320,"km":53},{"city":"מגשימים","range":"ב'","double":660,"full":1320,"km":53},{"city":"מעלה החמישה","range":"מיוחדת 1","double":1214,"full":1848,"km":53},{"city":"נחלים","range":"ב'","double":660,"full":1320,"km":53},{"city":"נחשונים","range":"ג'","double":864,"full":1728,"km":53},{"city":"עין נקובא","range":"מיוחדת 1","double":1214,"full":1848,"km":53},{"city":"עין ראפה","range":"מיוחדת 1","double":1214,"full":1848,"km":53},{"city":"רמת השרון","range":"ג'","double":864,"full":1728,"km":53},{"city":"גני תקווה","range":"ב'","double":660,"full":1320,"km":54},{"city":"מזור","range":"ב'","double":660,"full":1320,"km":54},{"city":"קרית אונו","range":"ב'","double":660,"full":1320,"km":54},{"city":"קרית ענבים","range":"מיוחדת 1","double":1214,"full":1848,"km":54},{"city":"הר אדר","range":"מיוחדת 1","double":1214,"full":1848,"km":55},{"city":"חגור","range":"ג'","double":864,"full":1728,"km":55},{"city":"יכיני","range":"ג'","double":864,"full":1728,"km":55},{"city":"נופך","range":"ב'","double":660,"full":1320,"km":55},{"city":"סעד","range":"ג'","double":864,"full":1728,"km":55},{"city":"ראש העין","range":"ג'","double":864,"full":1728,"km":55},{"city":"גבעת זאב","range":"מיוחדת 1","double":1214,"full":1848,"km":56},{"city":"כפר עציון","range":"מיוחדת 2","double":null,"full":2300,"km":56},{"city":"כרמי קטיף","range":"ג'","double":864,"full":1728,"km":56},{"city":"נטף","range":"מיוחדת 1","double":1214,"full":1848,"km":56},{"city":"עינת","range":"ג'","double":864,"full":1728,"km":56},{"city":"גליל ים","range":"ג'","double":864,"full":1728,"km":57},{"city":"מעש","range":"ב'","double":660,"full":1320,"km":57},{"city":"נתיבות","range":"ג'","double":864,"full":1728,"km":57},{"city":"פתח תקווה","range":"ב'","double":660,"full":1320,"km":57},{"city":"שובל","range":"ג'","double":864,"full":1728,"km":57},{"city":"בת עין","range":"מיוחדת 2","double":null,"full":2300,"km":58},{"city":"יושיביה","range":"ג'","double":864,"full":1728,"km":58},{"city":"כפר עזה","range":"ג'","double":864,"full":1728,"km":58},{"city":"עדנים","range":"ג'","double":864,"full":1728,"km":58},{"city":"עלומים","range":"ג'","double":864,"full":1728,"km":58},{"city":"אדורה","range":"ג'","double":864,"full":1728,"km":59},{"city":"ירקונה","range":"ג'","double":864,"full":1728,"km":59},{"city":"נחל עוז","range":"ג'","double":864,"full":1728,"km":59},{"city":"שובה","range":"ג'","double":864,"full":1728,"km":59},{"city":"תקומה","range":"ג'","double":864,"full":1728,"km":59},{"city":"אלישמע","range":"ג'","double":864,"full":1728,"km":60},{"city":"בית הגדי","range":"ג'","double":864,"full":1728,"km":60},{"city":"בני דקלים","range":"ג'","double":864,"full":1728,"km":60},{"city":"גני עם","range":"ג'","double":864,"full":1728,"km":60},{"city":"הוד השרון","range":"ג'","double":864,"full":1728,"km":60},{"city":"יד השמונה","range":"מיוחדת 1","double":1214,"full":1848,"km":60},{"city":"ירחיב","range":"ג'","double":864,"full":1728,"km":60},{"city":"צובה","range":"מיוחדת 1","double":1214,"full":1848,"km":60},{"city":"רמת רחל","range":"מיוחדת 1","double":1214,"full":1848,"km":60},{"city":"שקף","range":"ג'","double":864,"full":1728,"km":60},{"city":"תלם","range":"ג'","double":864,"full":1728,"km":60},{"city":"גבעת השלושה","range":"ב'","double":660,"full":1320,"km":61},{"city":"דבירה","range":"ג'","double":864,"full":1728,"km":61},{"city":"כפר סירקין","range":"ב'","double":660,"full":1320,"km":61},{"city":"כפר קאסם","range":"ג'","double":864,"full":1728,"km":61},{"city":"שדה צבי","range":"ג'","double":864,"full":1728,"km":61},{"city":"בארי","range":"מיוחדת 1","double":1214,"full":1848,"km":62},{"city":"זמרת","range":"ג'","double":864,"full":1728,"km":62},{"city":"כפר סבא","range":"ג'","double":864,"full":1728,"km":62},{"city":"רשפון","range":"ג'","double":864,"full":1728,"km":62},{"city":"תושיה","range":"ג'","double":864,"full":1728,"km":62},{"city":"אורה","range":"מיוחדת 1","double":1214,"full":1848,"km":63},{"city":"ג'לג'וליה","range":"ג'","double":864,"full":1728,"km":63},{"city":"כפר מל\"ל","range":"ג'","double":864,"full":1728,"km":63},{"city":"להבים","range":"ג'","double":864,"full":1728,"km":63},{"city":"נווה ירק","range":"ג'","double":864,"full":1728,"km":63},{"city":"פעמי תש\"ז","range":"ג'","double":864,"full":1728,"km":63},{"city":"שדי חמד","range":"ג'","double":864,"full":1728,"km":63},{"city":"שוקדה","range":"ג'","double":864,"full":1728,"km":63},{"city":"אלקנה","range":"ג'","double":864,"full":1728,"km":64},{"city":"אשבול","range":"ג'","double":864,"full":1728,"km":64},{"city":"ירושלים","range":"מיוחדת 1","double":1214,"full":1848,"km":64},{"city":"כפר ברא","range":"ג'","double":864,"full":1728,"km":64},{"city":"עמינדב","range":"מיוחדת 1","double":1214,"full":1848,"km":64},{"city":"רוחמה","range":"ג'","double":864,"full":1728,"km":64},{"city":"אבן ספיר","range":"מיוחדת 1","double":1214,"full":1848,"km":65},{"city":"גבע בנימין","range":"מיוחדת 2","double":null,"full":2300,"km":65},{"city":"גבעות בר","range":"ג'","double":864,"full":1728,"km":65},{"city":"כפר מימון","range":"ג'","double":864,"full":1728,"km":65},{"city":"מבועים","range":"ג'","double":864,"full":1728,"km":65},{"city":"מתן","range":"ג'","double":864,"full":1728,"km":65},{"city":"מתתיהו","range":"ב'","double":660,"full":1320,"km":65},{"city":"נוה צוף","range":"מיוחדת 1","double":1214,"full":1848,"km":65},{"city":"נטע","range":"ג'","double":864,"full":1728,"km":65},{"city":"קלחים","range":"ג'","double":864,"full":1728,"km":65},{"city":"קרית ספר מודיעין עלית","range":"ב'","double":660,"full":1320,"km":65},{"city":"רמות השבים","range":"ג'","double":864,"full":1728,"km":65},{"city":"גן חיים","range":"ג'","double":864,"full":1728,"km":66},{"city":"חורשים","range":"ג'","double":864,"full":1728,"km":66},{"city":"אורנית","range":"ג'","double":864,"full":1728,"km":67},{"city":"אלעזר","range":"מיוחדת 2","double":null,"full":2300,"km":67},{"city":"אפרת","range":"מיוחדת 2","double":null,"full":2300,"km":67},{"city":"בית אריה","range":"ג'","double":864,"full":1728,"km":67},{"city":"מעלה אדומים","range":"מיוחדת 2","double":null,"full":2300,"km":67},{"city":"נגוהות","range":"ג'","double":864,"full":1728,"km":67},{"city":"נווה ימין","range":"ג'","double":864,"full":1728,"km":67},{"city":"נירית","range":"ג'","double":864,"full":1728,"km":67},{"city":"צופית","range":"ג'","double":864,"full":1728,"km":67},{"city":"שבי דרום","range":"ג'","double":864,"full":1728,"km":67},{"city":"שערי תקווה","range":"ג'","double":864,"full":1728,"km":67},{"city":"תלמי ביל\"ו","range":"ג'","double":864,"full":1728,"km":67},{"city":"בית חורון","range":"ג'","double":864,"full":1728,"km":68},{"city":"זרועה","range":"ג'","double":864,"full":1728,"km":68},{"city":"מגדל עוז","range":"מיוחדת 2","double":null,"full":2300,"km":68},{"city":"ניר עקיבא","range":"ג'","double":864,"full":1728,"km":68},{"city":"רעים","range":"ג'","double":864,"full":1728,"km":68},{"city":"בית ברל","range":"ג'","double":864,"full":1728,"km":69},{"city":"הרצליה","range":"ג'","double":864,"full":1728,"km":69},{"city":"כוכב יעקב","range":"מיוחדת 2","double":null,"full":2300,"km":69},{"city":"ניר משה","range":"ג'","double":864,"full":1728,"km":69},{"city":"אייל","range":"ג'","double":864,"full":1728,"km":70},{"city":"אלפי מנשה","range":"מיוחדת 1","double":1214,"full":1848,"km":70},{"city":"בצרה","range":"ג'","double":864,"full":1728,"km":70},{"city":"גבעת ח\"ן","range":"ג'","double":864,"full":1728,"km":70},{"city":"געש","range":"מיוחדת 1","double":1214,"full":1848,"km":70},{"city":"נעלה","range":"ג'","double":864,"full":1728,"km":70},{"city":"עץ אפרים","range":"מיוחדת 1","double":1214,"full":1848,"km":70},{"city":"רמת הכובש","range":"ג'","double":864,"full":1728,"km":70},{"city":"רעננה","range":"ג'","double":864,"full":1728,"km":70},{"city":"שדה ורבורג","range":"ג'","double":864,"full":1728,"km":70},{"city":"שרשרת","range":"ג'","double":864,"full":1728,"km":70},{"city":"כפר שמריהו","range":"ג'","double":864,"full":1728,"km":71},{"city":"עלמון","range":"מיוחדת 2","double":null,"full":2300,"km":71},{"city":"שומריה","range":"ג'","double":864,"full":4600,"km":71},{"city":"תפרח","range":"ג'","double":864,"full":3500,"km":71},{"city":"אשל הנשיא","range":"ג'","double":864,"full":3500,"km":72},{"city":"הר גילה","range":"מיוחדת 1","double":1214,"full":4600,"km":72},{"city":"טירה","range":"ג'","double":864,"full":3500,"km":72},{"city":"כוכב יאיר","range":"ג'","double":864,"full":3500,"km":72},{"city":"מעלה מכמש","range":"מיוחדת 2","double":null,"full":4600,"km":72},{"city":"ניר אליהו","range":"ג'","double":864,"full":3500,"km":72},{"city":"גבעולים","range":"ג'","double":864,"full":4600,"km":73},{"city":"פסגות","range":"מיוחדת 2","double":null,"full":3500,"km":73},{"city":"שיבולים","range":"ג'","double":864,"full":3500,"km":73},{"city":"בטחה","range":"ג'","double":864,"full":3500,"km":74},{"city":"בני ציון","range":"מיוחדת 1","double":1214,"full":3500,"km":74},{"city":"גילת","range":"ג'","double":864,"full":3500,"km":74},{"city":"מעגלים","range":"ג'","double":864,"full":3500,"km":74},{"city":"מעלה שומרון","range":"מיוחדת 2","double":null,"full":3500,"km":74},{"city":"צופים","range":"מיוחדת 1","double":1214,"full":3500,"km":74},{"city":"קרית שלמה","range":"מיוחדת 1","double":1214,"full":3500,"km":74},{"city":"רהט","range":"ג'","double":864,"full":3500,"km":74},{"city":"אבן יהודה","range":"מיוחדת 1","double":1214,"full":4600,"km":75},{"city":"אל סייד","range":"ג'","double":864,"full":3500,"km":75},{"city":"באר שבע","range":"ג'","double":864,"full":3500,"km":75},{"city":"בני דרור","range":"ג'","double":864,"full":3500,"km":75},{"city":"כיסופים","range":"מיוחדת 2","double":null,"full":3500,"km":75},{"city":"כפר הס","range":"מיוחדת 1","double":1214,"full":3500,"km":75},{"city":"מלילות","range":"ג'","double":864,"full":3500,"km":75},{"city":"נווה דניאל","range":"מיוחדת 2","double":null,"full":3500,"km":75},{"city":"צור יצחק","range":"מיוחדת 1","double":1214,"full":3500,"km":75},{"city":"קרית ארבע","range":"מיוחדת 2","double":null,"full":4600,"km":75},{"city":"תל יצחק","range":"מיוחדת 1","double":1214,"full":3500,"km":75},{"city":"תל מונד","range":"מיוחדת 1","double":1214,"full":3500,"km":75},{"city":"אום בטין","range":"ג'","double":864,"full":3500,"km":76},{"city":"כרמי צור","range":"מיוחדת 2","double":null,"full":3500,"km":76},{"city":"משמרת","range":"מיוחדת 1","double":1214,"full":4600,"km":76},{"city":"נוקדים","range":"מיוחדת 2","double":null,"full":3500,"km":76},{"city":"נחליאל","range":"מיוחדת 2","double":null,"full":3500,"km":76},{"city":"עין ורד","range":"מיוחדת 1","double":1214,"full":4600,"km":76},{"city":"צור נתן","range":"ג'","double":864,"full":3500,"km":76},{"city":"שפיים","range":"מיוחדת 1","double":1214,"full":3500,"km":76},{"city":"תדהר","range":"ג'","double":864,"full":3500,"km":76},{"city":"אופקים","range":"ג'","double":864,"full":3500,"km":77},{"city":"ארסוף","range":"ג'","double":864,"full":4000,"km":77},{"city":"ברוש","range":"ג'","double":864,"full":3500,"km":77},{"city":"יקום","range":"ג'","double":864,"full":3500,"km":77},{"city":"להב","range":"ג'","double":864,"full":4600,"km":77},{"city":"לקיה","range":"ג'","double":864,"full":3500,"km":77},{"city":"נירים","range":"מיוחדת 2","double":null,"full":3500,"km":77},{"city":"עופרה","range":"מיוחדת 2","double":null,"full":3500,"km":77},{"city":"תאשור","range":"ג'","double":864,"full":4000,"km":77},{"city":"אודים","range":"ג'","double":864,"full":3500,"km":78},{"city":"חרוצים","range":"מיוחדת 1","double":1214,"full":3500,"km":78},{"city":"טייבה","range":"ג'","double":864,"full":3500,"km":78},{"city":"מצפה יריחו","range":"מיוחדת 3","double":null,"full":4000,"km":78},{"city":"משמר הנגב","range":"ג'","double":864,"full":3500,"km":78},{"city":"עין שריד","range":"מיוחדת 1","double":1214,"full":3500,"km":78},{"city":"פדויים","range":"ג'","double":864,"full":1728,"km":78},{"city":"תקוע","range":"מיוחדת 2","double":null,"full":2300,"km":78},{"city":"בית יהושע","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"חורה","range":"ג'","double":864,"full":1728,"km":79},{"city":"חירות","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"יעף","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"כפר אדומים","range":"מיוחדת 2","double":null,"full":2300,"km":79},{"city":"מגן","range":"מיוחדת 2","double":null,"full":2300,"km":79},{"city":"מיתר","range":"ג'","double":864,"full":1728,"km":79},{"city":"מסלול","range":"ג'","double":864,"full":1728,"km":79},{"city":"עין השלושה","range":"מיוחדת 2","double":null,"full":2300,"km":79},{"city":"עלי זהב","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"צור משה","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"קדימה-צורן","range":"מיוחדת 1","double":1214,"full":1848,"km":79},{"city":"רנן","range":"ג'","double":864,"full":1728,"km":79},{"city":"איתמר","range":"מיוחדת 3","double":null,"full":2900,"km":80},{"city":"אשכולות","range":"ג'","double":864,"full":1728,"km":80},{"city":"ברקן","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"בת חן","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"גנות הדר","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"כפר יעבץ","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"כרמית","range":"ג'","double":864,"full":1728,"km":80},{"city":"מעלה עמוס","range":"מיוחדת 2","double":null,"full":2300,"km":80},{"city":"ניר עוז","range":"מיוחדת 2","double":null,"full":2300,"km":80},{"city":"סלעית","range":"ג'","double":864,"full":1728,"km":80},{"city":"עזריאל","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"פדואל","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"פורת","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"פטיש","range":"ג'","double":864,"full":1728,"km":80},{"city":"פרדסיה","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"קרית נטפים","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"רבבה","range":"מיוחדת 1","double":1214,"full":1848,"km":80},{"city":"גבעת שפירא","range":"מיוחדת 1","double":1214,"full":1848,"km":81},{"city":"נורדיה","range":"מיוחדת 1","double":1214,"full":1848,"km":81},{"city":"סנסנה","range":"מיוחדת 1","double":1214,"full":1848,"km":81},{"city":"תל שבע","range":"ג'","double":864,"full":1728,"km":81},{"city":"פני חבר","range":"מיוחדת 2","double":null,"full":2300,"km":82},{"city":"כוכב השחר","range":"מיוחדת 3","double":null,"full":2900,"km":83},{"city":"קרני שומרון","range":"מיוחדת 1","double":1214,"full":1848,"km":83},{"city":"בארותיים","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"חניאל","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"כפר יונה","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"כפר נטר","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"משמר השרון","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"קדומים","range":"מיוחדת 1","double":1214,"full":1848,"km":84},{"city":"אספר","range":"מיוחדת 2","double":null,"full":2300,"km":85},{"city":"ברוכין","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"בת חפר","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"גאולים","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"הדר עם","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"העוגן","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"חצר בארותיים","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"יד חנה","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"יקיר","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"נתניה","range":"מיוחדת 1","double":1214,"full":1848,"km":85},{"city":"עין הבשור","range":"מיוחדת 2","double":null,"full":2300,"km":85},{"city":"אורים","range":"מיוחדת 1","double":1214,"full":1848,"km":86},{"city":"אלישיב","range":"מיוחדת 1","double":1214,"full":1848,"km":86},{"city":"בורגתה","range":"מיוחדת 1","double":1214,"full":1848,"km":86},{"city":"בית יצחק-שער חפר","range":"מיוחדת 1","double":1214,"full":1848,"km":86},{"city":"עומר","range":"ג'","double":864,"full":1728,"km":86},{"city":"עמנואל","range":"מיוחדת 1","double":1214,"full":1848,"km":86},{"city":"אוהד","range":"מיוחדת 2","double":null,"full":2300,"km":87},{"city":"מבואות יריחו","range":"מיוחדת 2","double":null,"full":2300,"km":87},{"city":"מדרשת רופין","range":"מיוחדת 2","double":null,"full":2300,"km":87},{"city":"עולש","range":"מיוחדת 1","double":1214,"full":1848,"km":87},{"city":"קלנסווה","range":"מיוחדת 1","double":1214,"full":1848,"km":87},{"city":"תנובות","range":"מיוחדת 1","double":1214,"full":1848,"km":87},{"city":"אריאל","range":"מיוחדת 1","double":1214,"full":1848,"km":88},{"city":"בחן","range":"מיוחדת 1","double":1214,"full":1848,"km":88},{"city":"בית אל","range":"מיוחדת 2","double":null,"full":2300,"km":88},{"city":"בית הלוי","range":"מיוחדת 1","double":1214,"full":1848,"km":88},{"city":"ינוב","range":"מיוחדת 1","double":1214,"full":1848,"km":88},{"city":"רימונים","range":"מיוחדת 3","double":null,"full":2900,"km":88},{"city":"חצרים","range":"ג'","double":864,"full":1728,"km":89},{"city":"מעברות","range":"מיוחדת 1","double":1214,"full":1848,"km":89},{"city":"ניצני עוז","range":"מיוחדת 1","double":1214,"full":1848,"km":89},{"city":"אביחיל","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"אליכין","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"אלמוג","range":"מיוחדת 3","double":null,"full":2900,"km":90},{"city":"ביתן אהרן","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"גבולות","range":"מיוחדת 2","double":null,"full":2300,"km":90},{"city":"גן יאשיה","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"חבצלת השרון","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"ייט\"ב","range":"מיוחדת 3","double":null,"full":2900,"km":90},{"city":"ישע","range":"מיוחדת 2","double":null,"full":2300,"km":90},{"city":"כפר ידידיה","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"כפר מונש","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"כפר תפוח","range":"מיוחדת 3","double":null,"full":2900,"km":90},{"city":"עמיעוז","range":"מיוחדת 2","double":null,"full":2300,"km":90},{"city":"שדה ניצן","range":"מיוחדת 2","double":null,"full":2300,"km":90},{"city":"שער אפרים","range":"מיוחדת 1","double":1214,"full":1848,"km":90},{"city":"תלמי אליהו","range":"מיוחדת 2","double":null,"full":2300,"km":90},{"city":"מבטחים","range":"מיוחדת 2","double":null,"full":2300,"km":91},{"city":"נופים","range":"מיוחדת 1","double":1214,"full":1848,"km":91},{"city":"ניר יצחק","range":"מיוחדת 2","double":null,"full":2300,"km":91},{"city":"צוקי ים","range":"מיוחדת 1","double":1214,"full":1848,"km":91},{"city":"אומץ","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"טנא","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"כפר חיים","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"כרמים","range":"ג'","double":864,"full":1728,"km":92},{"city":"להבות חביבה","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"סופה","range":"מיוחדת 2","double":null,"full":2300,"km":92},{"city":"ענב","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"צוחר","range":"מיוחדת 2","double":null,"full":2300,"km":92},{"city":"שושנת העמקים","range":"מיוחדת 1","double":1214,"full":1848,"km":92},{"city":"באקה אל-גרביה","range":"מיוחדת 1","double":1214,"full":1848,"km":93},{"city":"חופית","range":"מיוחדת 1","double":1214,"full":1848,"km":93},{"city":"אחיטוב","range":"מיוחדת 1","double":1214,"full":1848,"km":94},{"city":"המעפיל","range":"מיוחדת 1","double":1214,"full":1848,"km":94},{"city":"כסיפה","range":"מיוחדת 2","double":null,"full":2300,"km":94},{"city":"כפר ויתקין","range":"מיוחדת 1","double":1214,"full":1848,"km":94},{"city":"ג'ת","range":"מיוחדת 1","double":1214,"full":1848,"km":95},{"city":"מגל","range":"מיוחדת 1","double":1214,"full":1848,"km":95},{"city":"מכחול","range":"מיוחדת 2","double":null,"full":2300,"km":95},{"city":"פרי גן","range":"מיוחדת 2","double":null,"full":2300,"km":95},{"city":"אבשלום","range":"מיוחדת 2","double":null,"full":2300,"km":96},{"city":"בית הערבה","range":"מיוחדת 3","double":null,"full":2900,"km":96},{"city":"טלמון","range":"מיוחדת 1","double":1214,"full":1848,"km":96},{"city":"מבואות ים","range":"מיוחדת 1","double":1214,"full":1848,"km":96},{"city":"ורד יריחו","range":"מיוחדת 3","double":null,"full":2900,"km":97},{"city":"מעלה לבונה","range":"מיוחדת 3","double":null,"full":2900,"km":97},{"city":"נבטים","range":"מיוחדת 1","double":1214,"full":1848,"km":97},{"city":"עין החורש","range":"מיוחדת 1","double":1214,"full":1848,"km":97},{"city":"עין שמר","range":"מיוחדת 1","double":1214,"full":1848,"km":97},{"city":"רחלים","range":"מיוחדת 2","double":null,"full":2300,"km":97},{"city":"סעוה   (מולדה)","range":"מיוחדת 2","double":null,"full":2300,"km":97},{"city":"בית חירות","range":"מיוחדת 1","double":1214,"full":1848,"km":98},{"city":"בית ינאי","range":"מיוחדת 1","double":1214,"full":1848,"km":98},{"city":"מכמורת","range":"מיוחדת 1","double":1214,"full":1848,"km":98},{"city":"צאלים","range":"מיוחדת 2","double":null,"full":2300,"km":98},{"city":"שגב-שלום","range":"מיוחדת 1","double":1214,"full":1848,"km":98},{"city":"שדה אילן","range":"מיוחדת 3","double":null,"full":2900,"km":98},{"city":"שדה יצחק","range":"מיוחדת 1","double":1214,"full":1848,"km":98},{"city":"שדי אברהם","range":"מיוחדת 2","double":null,"full":2300,"km":98},{"city":"גבעת חיים )מאוחד(","range":"מיוחדת 1","double":1214,"full":1848,"km":99},{"city":"דקל","range":"מיוחדת 2","double":null,"full":2300,"km":99},{"city":"חגלה","range":"מיוחדת 1","double":1214,"full":1848,"km":99},{"city":"חיבת ציון","range":"מיוחדת 1","double":1214,"full":1848,"km":99},{"city":"יבול","range":"מיוחדת 2","double":null,"full":2300,"km":99},{"city":"תלמי יוסף","range":"מיוחדת 2","double":null,"full":2300,"km":99},{"city":"גאולי תימן","range":"מיוחדת 1","double":1214,"full":1848,"km":100},{"city":"זמר","range":"מיוחדת 1","double":1214,"full":1848,"km":100},{"city":"יצהר","range":"מיוחדת 3","double":null,"full":2900,"km":100},{"city":"יתד","range":"מיוחדת 2","double":null,"full":2300,"km":100},{"city":"כפר קרע","range":"מיוחדת 1","double":1214,"full":1848,"km":100},{"city":"ברכה","range":"מיוחדת 3","double":null,"full":2900,"km":101},{"city":"כפר הרא\"ה","range":"מיוחדת 1","double":1214,"full":1848,"km":101},{"city":"מגדלים","range":"מיוחדת 3","double":null,"full":2900,"km":101},{"city":"מענית","range":"מיוחדת 1","double":1214,"full":1848,"km":101},{"city":"מצר","range":"מיוחדת 1","double":1214,"full":1848,"km":101},{"city":"עלי","range":"מיוחדת 3","double":null,"full":2900,"km":101},{"city":"קיסריה","range":"מיוחדת 1","double":1214,"full":1848,"km":101},{"city":"חדרה","range":"מיוחדת 1","double":1214,"full":1848,"km":102},{"city":"שבי שומרון","range":"מיוחדת 1","double":1214,"full":1848,"km":102},{"city":"שער מנשה","range":"מיוחדת 1","double":1214,"full":1848,"km":103},{"city":"עתניאל","range":"מיוחדת 2","double":null,"full":2300,"km":104},{"city":"אביאל","range":"מיוחדת 2","double":null,"full":2300,"km":105},{"city":"ברקאי","range":"מיוחדת 1","double":1214,"full":1848,"km":105},{"city":"גן שמואל","range":"מיוחדת 1","double":1214,"full":1848,"km":105},{"city":"שילה","range":"מיוחדת 3","double":null,"full":2900,"km":105},{"city":"תלמי אלעזר","range":"מיוחדת 1","double":1214,"full":1848,"km":105},{"city":"אום אל-פחם","range":"מיוחדת 2","double":null,"full":2300,"km":106},{"city":"אלוני יצחק","range":"מיוחדת 2","double":null,"full":2300,"km":106},{"city":"נעורים","range":"מיוחדת 1","double":1214,"full":1848,"km":106},{"city":"סוסיה","range":"מיוחדת 2","double":null,"full":2300,"km":106},{"city":"שדות ים","range":"מיוחדת 1","double":1214,"full":1848,"km":106},{"city":"חגי","range":"מיוחדת 3","double":null,"full":2900,"km":107},{"city":"כחלה","range":"מיוחדת 2","double":null,"full":2300,"km":107},{"city":"כרמל","range":"מיוחדת 2","double":null,"full":2300,"km":107},{"city":"ערערה","range":"מיוחדת 2","double":null,"full":2300,"km":107},{"city":"יתיר","range":"מיוחדת 2","double":null,"full":2300,"km":107},{"city":"אום אל-קוטוף","range":"מיוחדת 1","double":1214,"full":1848,"km":108},{"city":"אור עקיבא","range":"מיוחדת 1","double":1214,"full":1848,"km":108},{"city":"חריש","range":"מיוחדת 1","double":1214,"full":1848,"km":108},{"city":"גיתית","range":"מיוחדת 3","double":null,"full":2900,"km":109},{"city":"חולית","range":"מיוחדת 2","double":null,"full":2300,"km":109},{"city":"מאור","range":"מיוחדת 1","double":1214,"full":1848,"km":109},{"city":"מעון","range":"מיוחדת 2","double":null,"full":2300,"km":109},{"city":"משמרות","range":"מיוחדת 1","double":1214,"full":1848,"km":109},{"city":"פרדס חנה-כרכור","range":"מיוחדת 1","double":1214,"full":1848,"km":109},{"city":"קציר","range":"מיוחדת 2","double":null,"full":2300,"km":109},{"city":"בנימינה-גבעת עדה","range":"מיוחדת 2","double":null,"full":2300,"km":110},{"city":"גבעת ניל\"י","range":"מיוחדת 2","double":null,"full":2300,"km":110},{"city":"כפר פינס","range":"מיוחדת 1","double":1214,"full":1848,"km":110},{"city":"מעלה אפרים","range":"מיוחדת 3","double":null,"full":2900,"km":110},{"city":"מצפה אילן","range":"מיוחדת 1","double":1214,"full":1848,"km":110},{"city":"שני","range":"מיוחדת 2","double":null,"full":2300,"km":110},{"city":"אלון מורה","range":"מיוחדת 3","double":null,"full":2900,"km":111},{"city":"רגבים","range":"מיוחדת 2","double":null,"full":2300,"km":112},{"city":"ירוחם","range":"מיוחדת 2","double":null,"full":2300,"km":113},{"city":"עין עירון","range":"מיוחדת 1","double":1214,"full":1848,"km":113},{"city":"רוח מדבר","range":"מיוחדת 2","double":null,"full":2300,"km":113},{"city":"ג'סר א-זרקא","range":"מיוחדת 2","double":null,"full":2300,"km":114},{"city":"אבו תלול","range":"מיוחדת 1","double":1214,"full":1848,"km":115},{"city":"אליקים","range":"מיוחדת 2","double":null,"full":2300,"km":115},{"city":"הר עמשא","range":"מיוחדת 2","double":null,"full":2300,"km":115},{"city":"עמיקם","range":"מיוחדת 2","double":null,"full":2300,"km":115},{"city":"רביבים","range":"מיוחדת 2","double":null,"full":2300,"km":115},{"city":"ריחן","range":"מיוחדת 2","double":null,"full":2300,"km":115},{"city":"ערערה-בנגב","range":"מיוחדת 2","double":null,"full":2300,"km":116},{"city":"שקד","range":"מיוחדת 2","double":null,"full":2300,"km":116},{"city":"בית חנניה","range":"מיוחדת 2","double":null,"full":2300,"km":117},{"city":"דימונה","range":"מיוחדת 2","double":null,"full":2300,"km":117},{"city":"חיננית","range":"מיוחדת 2","double":null,"full":2300,"km":117},{"city":"כפר גליקסון","range":"מיוחדת 2","double":null,"full":2300,"km":118},{"city":"שלומית","range":"מיוחדת 2","double":null,"full":2300,"km":118},{"city":"היוגב","range":"מיוחדת 2","double":null,"full":2300,"km":119},{"city":"מי עמי","range":"מיוחדת 2","double":null,"full":2300,"km":119},{"city":"מכורה","range":"מיוחדת 3","double":null,"full":2900,"km":119},{"city":"פצאל","range":"מיוחדת 3","double":null,"full":2900,"km":119},{"city":"רתמים","range":"מיוחדת 2","double":null,"full":2300,"km":119},{"city":"אשלים","range":"מיוחדת 2","double":null,"full":2300,"km":120},{"city":"בת שלמה","range":"מיוחדת 2","double":null,"full":2300,"km":120},{"city":"מעגן מיכאל","range":"מיוחדת 2","double":null,"full":2300,"km":120},{"city":"חרמש","range":"מיוחדת 2","double":null,"full":2300,"km":121},{"city":"משמר העמק","range":"מיוחדת 2","double":null,"full":2300,"km":121},{"city":"עין העמק","range":"מיוחדת 2","double":null,"full":2300,"km":121},{"city":"זכרון יעקב","range":"מיוחדת 2","double":null,"full":2300,"km":122},{"city":"טללים","range":"מיוחדת 2","double":null,"full":2300,"km":122},{"city":"מעלה עירון","range":"מיוחדת 2","double":null,"full":2300,"km":122},{"city":"פוריידיס","range":"מיוחדת 2","double":null,"full":2300,"km":122},{"city":"רמת השופט","range":"מיוחדת 1","double":1214,"full":1848,"km":123},{"city":"דבורה","range":"מיוחדת 3","double":null,"full":2900,"km":124},{"city":"יקנעם עילית","range":"מיוחדת 2","double":null,"full":2300,"km":124},{"city":"בני נצרים","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"דליה","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"חבר","range":"מיוחדת 3","double":null,"full":2900,"km":125},{"city":"מאיר שפיה","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"מבוא דותן","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"עין השופט","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"ערד","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"רמות מנשה","range":"מיוחדת 2","double":null,"full":2300,"km":125},{"city":"ברק","range":"מיוחדת 3","double":null,"full":2900,"km":126},{"city":"גבעת עוז","range":"מיוחדת 2","double":null,"full":2300,"km":126},{"city":"יקנעם )מושבה(","range":"מיוחדת 2","double":null,"full":2300,"km":126},{"city":"מעין צבי","range":"מיוחדת 2","double":null,"full":2300,"km":126},{"city":"נחשולים","range":"מיוחדת 2","double":null,"full":2300,"km":126},{"city":"ניר יפה","range":"מיוחדת 3","double":null,"full":2900,"km":126},{"city":"שדה בוקר","range":"מיוחדת 3","double":null,"full":2900,"km":126},{"city":"אורנים","range":"מיוחדת 3","double":null,"full":2900,"km":127},{"city":"ביר הדאג'","range":"מיוחדת 2","double":null,"full":2300,"km":127},{"city":"גבע כרמל","range":"מיוחדת 2","double":null,"full":2300,"km":127},{"city":"חמרה","range":"מיוחדת 3","double":null,"full":2900,"km":127},{"city":"מגידו","range":"מיוחדת 2","double":null,"full":2300,"km":127},{"city":"עין איילה","range":"מיוחדת 2","double":null,"full":2300,"km":127},{"city":"אכסאל","range":"מיוחדת 3","double":null,"full":2900,"km":128},{"city":"דאלית אל-כרמל","range":"מיוחדת 2","double":null,"full":2300,"km":129},{"city":"עפולה","range":"מיוחדת 3","double":null,"full":2900,"km":129},{"city":"צרופה","range":"מיוחדת 2","double":null,"full":2300,"km":129},{"city":"גדיש","range":"מיוחדת 3","double":null,"full":2900,"km":130},{"city":"דור","range":"מיוחדת 2","double":null,"full":2300,"km":130},{"city":"הבונים","range":"מיוחדת 2","double":null,"full":2300,"km":130},{"city":"הזורע","range":"מיוחדת 2","double":null,"full":2300,"km":130},{"city":"שדה יעקב","range":"מיוחדת 3","double":null,"full":2900,"km":130},{"city":"בית זיד","range":"מיוחדת 3","double":null,"full":2900,"km":131},{"city":"דברת","range":"מיוחדת 3","double":null,"full":2900,"km":131},{"city":"כרם מהר\"ל","range":"מיוחדת 3","double":null,"full":2900,"km":131},{"city":"מרחב עם","range":"מיוחדת 3","double":null,"full":2900,"km":131},{"city":"עופר","range":"מיוחדת 3","double":null,"full":2900,"km":131},{"city":"אומן","range":"מיוחדת 3","double":null,"full":2900,"km":132},{"city":"מגן שאול","range":"מיוחדת 3","double":null,"full":2900,"km":132},{"city":"משאבי שדה","range":"מיוחדת 2","double":null,"full":2300,"km":132},{"city":"עין כרמל","range":"מיוחדת 3","double":null,"full":2900,"km":132},{"city":"עספיא","range":"מיוחדת 2","double":null,"full":2300,"km":132},{"city":"רם-און","range":"מיוחדת 3","double":null,"full":2900,"km":132},{"city":"שלווה במדבר","range":"מיוחדת 3","double":null,"full":2900,"km":132},{"city":"אלונים","range":"מיוחדת 3","double":null,"full":2900,"km":133},{"city":"בית צבי","range":"מיוחדת 3","double":null,"full":2900,"km":133},{"city":"גלעד )אבן יצחק(","range":"מיוחדת 2","double":null,"full":2300,"km":133},{"city":"מלאה","range":"מיוחדת 3","double":null,"full":2900,"km":133},{"city":"עתלית","range":"מיוחדת 2","double":null,"full":2300,"km":133},{"city":"קרית טבעון","range":"מיוחדת 3","double":null,"full":2900,"km":133},{"city":"שער העמקים","range":"מיוחדת 3","double":null,"full":2900,"km":133},{"city":"גבע","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"יזרעאל","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"יעל","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"כדורי","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"כפר יחזקאל","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"סולם","range":"מיוחדת 3","double":null,"full":2900,"km":134},{"city":"אבטין","range":"מיוחדת 3","double":null,"full":2900,"km":135},{"city":"אדירים","range":"מיוחדת 3","double":null,"full":2900,"km":135},{"city":"כרם שלום","range":"מיוחדת 2","double":null,"full":2300,"km":135},{"city":"פרזון","range":"מיוחדת 3","double":null,"full":2900,"km":135},{"city":"רמת ישי","range":"מיוחדת 3","double":null,"full":2900,"km":135},{"city":"בית שערים","range":"מיוחדת 3","double":null,"full":2900,"km":136},{"city":"בלפוריה","range":"מיוחדת 3","double":null,"full":2900,"km":136},{"city":"נווה ים","range":"מיוחדת 2","double":null,"full":2300,"km":136},{"city":"ניר עציון","range":"מיוחדת 2","double":null,"full":2300,"km":136},{"city":"עין הוד","range":"מיוחדת 2","double":null,"full":2300,"km":136},{"city":"עין חרוד )מאוחד(","range":"מיוחדת 3","double":null,"full":2900,"km":136},{"city":"אביטל","range":"מיוחדת 3","double":null,"full":2900,"km":137},{"city":"אלוני אבא","range":"מיוחדת 3","double":null,"full":2900,"km":137},{"city":"מגדים","range":"מיוחדת 3","double":null,"full":2900,"km":137},{"city":"מדרך עוז","range":"מיוחדת 2","double":null,"full":2300,"km":137},{"city":"מנשית זבדה","range":"מיוחדת 3","double":null,"full":2900,"km":137},{"city":"ניין","range":"מיוחדת 3","double":null,"full":2900,"km":137},{"city":"החותרים","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"יגור","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"כפר גדעון","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"כפר חסידים א'","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"כפר חסידים ב'","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"מזרע","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"מיטב","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"מרחביה )מושב(","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"נשר","range":"מיוחדת 3","double":null,"full":2900,"km":138},{"city":"בית לחם הגלילית","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"בסמת טבעון","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"חיפה","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"כפר גלים","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"מרחביה )קיבוץ(","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"עין חוד","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"תל עדשים","range":"מיוחדת 3","double":null,"full":2900,"km":139},{"city":"בית אורן","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"זרזיר","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"נהלל","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"ניר דוד )תל עמל(","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"רכסים","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"רמת דוד","range":"מיוחדת 3","double":null,"full":2900,"km":140},{"city":"עין חרוד )איחוד(","range":"מיוחדת 3","double":null,"full":2900,"km":141},{"city":"תמרת","range":"מיוחדת 3","double":null,"full":2900,"km":141},{"city":"גבעת אלה","range":"מיוחדת 3","double":null,"full":2900,"km":142},{"city":"גן נר","range":"מיוחדת 3","double":null,"full":2900,"km":142},{"city":"טירת כרמל","range":"מיוחדת 3","double":null,"full":2900,"km":142},{"city":"יפעת","range":"מיוחדת 3","double":null,"full":2900,"km":142},{"city":"מגדל העמק","range":"מיוחדת 3","double":null,"full":2900,"km":142},{"city":"אחוזת ברק","range":"מיוחדת 3","double":null,"full":2900,"km":143},{"city":"כפר קיש","range":"מיוחדת 3","double":null,"full":2900,"km":143},{"city":"נורית","range":"מיוחדת 3","double":null,"full":2900,"km":143},{"city":"אושה","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"הסוללים","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"כפר המכבי","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"כפר כמא","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"רמת יוחנן","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"שריד","range":"מיוחדת 3","double":null,"full":2900,"km":144},{"city":"אעבלין","range":"מיוחדת 3","double":null,"full":2900,"km":145},{"city":"עדי","range":"מיוחדת 3","double":null,"full":2900,"km":145},{"city":"קרית אתא","range":"מיוחדת 3","double":null,"full":2900,"km":146},{"city":"תל יוסף","range":"מיוחדת 3","double":null,"full":2900,"km":146},{"city":"ביר אל-מכסור","range":"מיוחדת 3","double":null,"full":2900,"km":147},{"city":"חנתון","range":"מיוחדת 3","double":null,"full":2900,"km":147},{"city":"טמרה )יזרעאל(","range":"מיוחדת 3","double":null,"full":2900,"km":147},{"city":"נופית","range":"מיוחדת 3","double":null,"full":2900,"km":147},{"city":"שמשית","range":"מיוחדת 3","double":null,"full":2900,"km":147},{"city":"יפיע","range":"מיוחדת 3","double":null,"full":2900,"km":148},{"city":"כפר ביאליק","range":"מיוחדת 3","double":null,"full":2900,"km":148},{"city":"ציפורי","range":"מיוחדת 3","double":null,"full":2900,"km":148},{"city":"הרדוף","range":"מיוחדת 3","double":null,"full":2900,"km":149},{"city":"כפר ברוך","range":"מיוחדת 3","double":null,"full":2900,"km":149},{"city":"כפר מנדא","range":"מיוחדת 3","double":null,"full":2900,"km":149},{"city":"ג'ולס","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"גזית","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"עילוט","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"קרית ביאליק","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"קרית ים","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"רמת צבי","range":"מיוחדת 3","double":null,"full":2900,"km":150},{"city":"בית השיטה","range":"מיוחדת 3","double":null,"full":2900,"km":151},{"city":"חפצי-בה","range":"מיוחדת 3","double":null,"full":2900,"km":151},{"city":"כפר תבור","range":"מיוחדת 3","double":null,"full":2900,"km":151},{"city":"מולדת","range":"מיוחדת 3","double":null,"full":2900,"km":151},{"city":"קרית מוצקין","range":"מיוחדת 3","double":null,"full":2900,"km":151},{"city":"אפק","range":"מיוחדת 3","double":null,"full":2900,"km":152},{"city":"מצפה אבי\"ב","range":"מיוחדת 3","double":null,"full":2900,"km":152},{"city":"רומת הייב","range":"מיוחדת 3","double":null,"full":2900,"km":152},{"city":"שדמות דבורה","range":"מיוחדת 3","double":null,"full":2900,"km":152},{"city":"שפרעם","range":"מיוחדת 3","double":null,"full":2900,"km":152},{"city":"כאבול","range":"מיוחדת 3","double":null,"full":2900,"km":153},{"city":"עין דור","range":"מיוחדת 3","double":null,"full":2900,"km":153},{"city":"ריינה","range":"מיוחדת 3","double":null,"full":2900,"km":153},{"city":"טמרה","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"יסעור","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"כפר כנא","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"כפר מסריק","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"משהד","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"נצרת","range":"מיוחדת 3","double":null,"full":2900,"km":154},{"city":"מעלה גלבוע","range":"מיוחדת 3","double":null,"full":2900,"km":155},{"city":"עין המפרץ","range":"מיוחדת 3","double":null,"full":2900,"km":155},{"city":"שדה נחום","range":"מיוחדת 3","double":null,"full":2900,"km":155},{"city":"כמהין","range":"מיוחדת 3","double":null,"full":2900,"km":156},{"city":"מורשת","range":"מיוחדת 3","double":null,"full":2900,"km":156},{"city":"עין מאהל","range":"מיוחדת 3","double":null,"full":2900,"km":157},{"city":"בית שאן","range":"מיוחדת 3","double":null,"full":2900,"km":158},{"city":"יעד","range":"מיוחדת 3","double":null,"full":2900,"km":158},{"city":"מסילות","range":"מיוחדת 3","double":null,"full":2900,"km":158},{"city":"שרונה","range":"מיוחדת 3","double":null,"full":2900,"km":158},{"city":"אחיהוד","range":"מיוחדת 3","double":null,"full":2900,"km":159},{"city":"רשפים","range":"מיוחדת 3","double":null,"full":2900,"km":159},{"city":"באר מילכה","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"בית רימון","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"ג'דיידה-מכר","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"חמדיה","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"יודפת","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"עכו","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"קורנית","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"שכניה","range":"מיוחדת 3","double":null,"full":2900,"km":160},{"city":"מנוף","range":"מיוחדת 3","double":null,"full":2900,"km":161},{"city":"אילניה","range":"מיוחדת 3","double":null,"full":2900,"km":162},{"city":"בית העמק","range":"מיוחדת 3","double":null,"full":2900,"km":162},{"city":"עברון","range":"מיוחדת 3","double":null,"full":2900,"km":162},{"city":"רקפת","range":"מיוחדת 3","double":null,"full":2900,"km":162},{"city":"שמרת","range":"מיוחדת 3","double":null,"full":2900,"km":162},{"city":"בוסתן הגליל","range":"מיוחדת 3","double":null,"full":2900,"km":163},{"city":"כפר יאסיף","range":"מיוחדת 3","double":null,"full":2900,"km":163},{"city":"לוחמי הגיטאות","range":"מיוחדת 3","double":null,"full":2900,"km":163},{"city":"נהריה","range":"מיוחדת 3","double":null,"full":2900,"km":163},{"city":"לביא","range":"מיוחדת 3","double":null,"full":2900,"km":164},{"city":"נס עמים","range":"מיוחדת 3","double":null,"full":2900,"km":164},{"city":"סח'נין","range":"מיוחדת 3","double":null,"full":2900,"km":165},{"city":"יובלים","range":"מיוחדת 3","double":null,"full":2900,"km":166},{"city":"עצמון שגב","range":"מיוחדת 3","double":null,"full":2900,"km":166},{"city":"שבי ציון","range":"מיוחדת 3","double":null,"full":2900,"km":166},{"city":"שורשים","range":"מיוחדת 3","double":null,"full":2900,"km":166},{"city":"אבו סנאן","range":"מיוחדת 3","double":null,"full":2900,"km":167},{"city":"רגבה","range":"מיוחדת 3","double":null,"full":2900,"km":167},{"city":"גילון","range":"מיוחדת 3","double":null,"full":2900,"km":168},{"city":"אשחר","range":"מיוחדת 3","double":null,"full":2900,"km":169},{"city":"אשרת","range":"מיוחדת 3","double":null,"full":2900,"km":169},{"city":"ירכא","range":"מיוחדת 3","double":null,"full":2900,"km":169},{"city":"עמקה","range":"מיוחדת 3","double":null,"full":2900,"km":169},{"city":"בן עמי","range":"מיוחדת 3","double":null,"full":2900,"km":170},{"city":"נתיב השיירה","range":"מיוחדת 3","double":null,"full":2900,"km":171},{"city":"אשבל","range":"מיוחדת 3","double":null,"full":2900,"km":172},{"city":"דייר אל-אסד","range":"מיוחדת 3","double":null,"full":2900,"km":172},{"city":"כרמיאל","range":"מיוחדת 3","double":null,"full":2900,"km":173},{"city":"נווה זיו","range":"מיוחדת 3","double":null,"full":2900,"km":173},{"city":"צביה","range":"מיוחדת 3","double":null,"full":2900,"km":173},{"city":"געתון","range":"מיוחדת 3","double":null,"full":2900,"km":174},{"city":"ניצנה )קהילת חינוך(","range":"מיוחדת 3","double":null,"full":2900,"km":174},{"city":"ניצני סיני","range":"מיוחדת 3","double":null,"full":2900,"km":174},{"city":"כברי","range":"מיוחדת 3","double":null,"full":2900,"km":175},{"city":"תובל","range":"מיוחדת 3","double":null,"full":2900,"km":175},{"city":"כליל","range":"מיוחדת 3","double":null,"full":2900,"km":176},{"city":"פלך","range":"מיוחדת 3","double":null,"full":2900,"km":177},{"city":"אלון הגליל","range":"מיוחדת 3","double":null,"full":2900,"km":180},{"city":"דולב","range":"מיוחדת 1","double":1214,"full":1848,"km":212},{"city":"אבני חפץ","range":"מיוחדת 1","double":1214,"full":1848,"km":217},{"city":"כפר סבא","range":"ג'","double":864,"full":1728,"km":226}];
+
+// Shipping logic
+let selectedCity = null;
+
+const cityInput = document.getElementById('cityInput');
+const cityDropdown = document.getElementById('cityDropdown');
+const shippingResults = document.getElementById('shippingResults');
+
+function normHe(s) {
+  return s.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function searchCities(q) {
+  if (!q || q.length < 1) return [];
+  const norm = normHe(q);
+  return SHIPPING_DATA.filter(r => normHe(r.city).includes(norm)).slice(0, 40);
+}
+
+function hlCity(city, q) {
+  if (!q) return city;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return city.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="city-match">$1</span>');
+}
+
+function renderDropdown(results, q) {
+  cityDropdown.innerHTML = '';
+  if (results.length === 0) {
+    cityDropdown.innerHTML = '<div class="shipping-no-results">לא נמצא יישוב מתאים</div>';
+  } else {
+    results.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'shipping-option';
+      div.innerHTML = `<span class="city-name">${hlCity(r.city, q)}</span><span class="city-range">טווח ${r.range}</span>`;
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectCity(r);
+      });
+      cityDropdown.appendChild(div);
+    });
+  }
+  cityDropdown.classList.add('open');
+}
+
+function selectCity(r) {
+  selectedCity = r;
+  cityInput.value = r.city;
+  cityDropdown.classList.remove('open');
+  renderShippingResult(r);
+}
+
+const DOUBLE_PALLETS = 9;
+const FULL_PALLETS   = 24;
+
+function shippingCosts(r) {
+  // Returns per-pallet, per-m3, per-unit, per-m2 for double and full
+  // These are the ADDED shipping cost per unit
+  return {
+    double: r.double != null ? {
+      total:    r.double,
+      pallet:   r.double / DOUBLE_PALLETS,
+    } : null,
+    full: r.full != null ? {
+      total:    r.full,
+      pallet:   r.full / FULL_PALLETS,
+    } : null,
+  };
+}
+
+// Compute per-product shipping adder given cost-per-pallet and product data
+function shipPerProduct(costPerPallet, p) {
+  const palletQty = p['כמות במשטח'];   // units per pallet
+  const kovBeMishтach = p['קוב במשטח']; // m³ per pallet
+  const unitPrice   = costPerPallet / palletQty;
+  const kovPrice    = kovBeMishтach > 0 ? costPerPallet / kovBeMishтach : null;
+  const mrUnits     = p['יחידות במ"ר'];
+  const mrPrice     = mrUnits > 0 ? unitPrice * mrUnits : null;
+  return { unit: unitPrice, kov: kovPrice, mr: mrPrice, pallet: costPerPallet };
+}
+
+function renderShippingResult(r) {
+  const costs = shippingCosts(r);
+  const kmStr = r.km != null ? `${r.km} ק"מ` : null;
+
+  function truckCard(label, emoji, costObj, cls) {
+    if (!costObj) return `
+      <div class="shipping-card ${cls}">
+        <div class="shipping-card-label">${emoji} ${label}</div>
+        <div style="font-size:13px;color:var(--text-muted);font-style:italic;margin-top:6px">לא זמין</div>
+      </div>`;
+    return `
+      <div class="shipping-card ${cls}">
+        <div class="shipping-card-label">${emoji} ${label} · ${label==='משאית דאבל'?DOUBLE_PALLETS:FULL_PALLETS} משטחים</div>
+        <div class="shipping-card-value">₪${Math.round(costObj.total).toLocaleString('he-IL')}</div>
+        <div class="shipping-sub-grid">
+          <div class="shipping-sub-item"><span>/ משטח</span><strong>₪${Math.round(costObj.pallet).toLocaleString('he-IL')}</strong></div>
+        </div>
+      </div>`;
+  }
+
+  shippingResults.style.display = 'flex';
+  shippingResults.innerHTML = `
+    <div class="shipping-card selected-city">
+      <div class="shipping-card-label">יישוב נבחר</div>
+      <div class="shipping-card-value">${r.city}</div>
+      <div class="range-badge">טווח ${r.range}${kmStr ? ' · ' + kmStr : ''}</div>
+    </div>
+    ${truckCard('משאית דאבל','🚛', costs.double, 'double-card')}
+    ${truckCard('משאית פול','🚚', costs.full, 'full-card')}
+    <button class="shipping-clear-city" id="clearCityBtn">✕ נקה</button>
+  `;
+
+  document.getElementById('clearCityBtn').addEventListener('click', () => {
+    selectedCity = null;
+    cityInput.value = '';
+    shippingResults.style.display = 'none';
+    shippingResults.innerHTML = '';
+    updateUI();
+  });
+
+  // Re-render cards so they pick up shipping costs
+  updateUI();
+}
+
+cityInput.addEventListener('input', function() {
+  const q = this.value.trim();
+  if (!q) {
+    cityDropdown.classList.remove('open');
+    return;
+  }
+  const results = searchCities(q);
+  renderDropdown(results, q);
+});
+
+cityInput.addEventListener('focus', function() {
+  if (this.value.trim()) {
+    const results = searchCities(this.value.trim());
+    renderDropdown(results, this.value.trim());
+  }
+});
+
+cityInput.addEventListener('blur', function() {
+  setTimeout(() => cityDropdown.classList.remove('open'), 150);
+});
+
+document.addEventListener('click', function(e) {
+  if (!cityInput.contains(e.target) && !cityDropdown.contains(e.target)) {
+    cityDropdown.classList.remove('open');
+  }
+});
+
+// Init
+updateUI();
+</script>
+</body>
+</html>
