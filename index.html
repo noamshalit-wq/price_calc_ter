@@ -237,6 +237,86 @@
 
   .sort-select:focus { border-color: var(--accent); }
 
+  /* DIMENSION FILTERS */
+  .dims-filter-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 32px;
+    position: sticky;
+    top: 152px;
+    z-index: 88;
+  }
+
+  .dims-filter-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .dim-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .dim-filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .dim-chip {
+    padding: 4px 11px;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+    font-family: 'Heebo', sans-serif;
+    white-space: nowrap;
+  }
+
+  .dim-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .dim-chip.active { background: #1e3a8a; border-color: #1e3a8a; color: white; }
+
+  .dim-sep {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .dims-reset-btn {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 3px 10px;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    transition: all 0.15s;
+    display: none;
+  }
+
+  .dims-reset-btn:hover { border-color: var(--red); color: var(--red); }
+  .dims-reset-btn.visible { display: block; }
+
+  @media (max-width: 768px) {
+    .dims-filter-bar { padding: 8px 16px; top: 138px; }
+    .discount-bar { top: 186px; padding: 8px 16px; }
+  }
+
   /* MAIN */
   main {
     max-width: 1400px;
@@ -1071,7 +1151,6 @@
     <div class="filter-chips">
       <button class="chip active" data-status="all">הכל</button>
       <button class="chip" data-status="פעיל">פעיל</button>
-      <button class="chip" data-status="אסור למכירה">אסור</button>
     </div>
     <select class="sort-select" id="sortSelect">
       <option value="default">מיון: ברירת מחדל</option>
@@ -1084,6 +1163,55 @@
       <button class="view-btn active" id="gridViewBtn" title="תצוגת רשת">⊞</button>
       <button class="view-btn" id="listViewBtn" title="תצוגת רשימה">☰</button>
     </div>
+  </div>
+</div>
+
+<div class="dims-filter-bar">
+  <div class="dims-filter-inner">
+    <div class="dim-filter-group">
+      <span class="dim-filter-label">עובי:</span>
+      <button class="dim-chip active" data-dim="thick" data-val="all">הכל</button>
+      <button class="dim-chip" data-dim="thick" data-val="4">4</button>
+      <button class="dim-chip" data-dim="thick" data-val="7">7</button>
+      <button class="dim-chip" data-dim="thick" data-val="10">10</button>
+      <button class="dim-chip" data-dim="thick" data-val="15">15</button>
+      <button class="dim-chip" data-dim="thick" data-val="20">20</button>
+      <button class="dim-chip" data-dim="thick" data-val="22">22</button>
+      <button class="dim-chip" data-dim="thick" data-val="25">25</button>
+      <button class="dim-chip" data-dim="thick" data-val="30">30</button>
+    </div>
+    <div class="dim-sep"></div>
+    <div class="dim-filter-group">
+      <span class="dim-filter-label">גובה:</span>
+      <button class="dim-chip active" data-dim="height" data-val="all">הכל</button>
+      <button class="dim-chip" data-dim="height" data-val="5">5</button>
+      <button class="dim-chip" data-dim="height" data-val="6">6</button>
+      <button class="dim-chip" data-dim="height" data-val="7">7</button>
+      <button class="dim-chip" data-dim="height" data-val="8">8</button>
+      <button class="dim-chip" data-dim="height" data-val="9">9</button>
+      <button class="dim-chip" data-dim="height" data-val="10">10</button>
+      <button class="dim-chip" data-dim="height" data-val="11">11</button>
+      <button class="dim-chip" data-dim="height" data-val="12">12</button>
+      <button class="dim-chip" data-dim="height" data-val="13">13</button>
+      <button class="dim-chip" data-dim="height" data-val="14">14</button>
+      <button class="dim-chip" data-dim="height" data-val="15">15</button>
+      <button class="dim-chip" data-dim="height" data-val="16">16</button>
+      <button class="dim-chip" data-dim="height" data-val="17">17</button>
+      <button class="dim-chip" data-dim="height" data-val="18">18</button>
+      <button class="dim-chip" data-dim="height" data-val="20">20</button>
+      <button class="dim-chip" data-dim="height" data-val="25">25</button>
+    </div>
+    <div class="dim-sep"></div>
+    <div class="dim-filter-group">
+      <span class="dim-filter-label">אורך:</span>
+      <button class="dim-chip active" data-dim="length" data-val="all">הכל</button>
+      <button class="dim-chip" data-dim="length" data-val="20">20</button>
+      <button class="dim-chip" data-dim="length" data-val="25">25</button>
+      <button class="dim-chip" data-dim="length" data-val="30">30</button>
+      <button class="dim-chip" data-dim="length" data-val="40">40</button>
+      <button class="dim-chip" data-dim="length" data-val="50">50</button>
+    </div>
+    <button class="dims-reset-btn" id="dimsResetBtn">✕ אפס מידות</button>
   </div>
 </div>
 
@@ -1144,6 +1272,9 @@ let currentSort = 'default';
 let currentSearch = '';
 let isListView = false;
 let currentDiscount = 0; // 0-100
+let dimThick = 'all';
+let dimHeight = 'all';
+let dimLength = 'all';
 
 function fmt(n, decimals = 2) {
   if (n == null || n === '' || isNaN(n)) return '—';
@@ -1198,6 +1329,16 @@ function filterAndSort() {
 
   if (currentStatus !== 'all') {
     result = result.filter(p => p['סטטוס'] === currentStatus);
+  }
+
+  if (dimThick !== 'all') {
+    result = result.filter(p => Math.round(p['עובי במטר'] * 100) === Number(dimThick));
+  }
+  if (dimHeight !== 'all') {
+    result = result.filter(p => Math.round(p['גובה במטר'] * 100) === Number(dimHeight));
+  }
+  if (dimLength !== 'all') {
+    result = result.filter(p => Math.round(p['אורך במטר'] * 100) === Number(dimLength));
   }
 
   const price = p => {
@@ -1325,10 +1466,6 @@ function renderCards(data) {
             <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:3px">${hasDiscount ? '<s style="opacity:0.5">מחיר מחירון</s>' : 'מחיר מחירון'}</div>
             <div class="price-main" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.45;font-size:16px' : ''}">${priceStr}<span>/ יחידה</span></div>
           </div>
-          <div style="text-align:left">
-            <div class="price-min-label">מחיר מינימום</div>
-            <div class="price-min-val">${minPrice}</div>
-          </div>
         </div>
         ${discountedRow}
         <div class="dims-row" style="margin-top:${hasDiscount?'8px':'0'}">
@@ -1390,13 +1527,9 @@ function openModal(makat) {
       <div class="modal-section-title">💰 מחירים</div>
       <div class="modal-grid">
         <div class="modal-item" style="${hasDiscount ? 'border-color:#fca5a5' : ''}">
-          <div class="modal-item-label">מחיר מחירון</div>
+          <div class="modal-item-label">מחיר מחירון ליחידה</div>
           <div class="modal-item-value big" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.45;font-size:15px' : ''}">₪${price > 0 ? fmt(price) : '—'}</div>
-          ${hasDiscount ? `<div style="font-size:18px;font-weight:800;color:var(--green);direction:ltr;margin-top:3px">₪${fmt(discountedPrice)}</div>` : ''}
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">מחיר מינימום</div>
-          <div class="modal-item-value big" style="color:var(--green)">₪${fmt(p['מחיר מינימום'])}</div>
+          ${hasDiscount ? `<div style="font-size:18px;font-weight:800;color:var(--green);direction:ltr;margin-top:3px">₪${fmt(discountedPrice)}</div><div style="font-size:10px;color:var(--green);font-weight:600;margin-top:2px">אחרי הנחה ${currentDiscount}%</div>` : ''}
         </div>
         <div class="modal-item">
           <div class="modal-item-label">מחיר לקוב</div>
@@ -1412,60 +1545,6 @@ function openModal(makat) {
           <div class="modal-item-label">מחיר למ"ר</div>
           <div class="modal-item-value" style="${hasDiscount ? 'text-decoration:line-through;opacity:0.4;font-size:12px' : ''}">₪${Math.round(p['מחיר בסיס למ"ר']).toLocaleString()}</div>
           ${hasDiscount ? `<div style="font-weight:700;color:var(--green);direction:ltr">₪${discountedMR.toLocaleString()}</div>` : ''}
-        </div>
-      </div>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-title">📐 מידות ומשקל</div>
-      <div class="modal-grid">
-        <div class="modal-item">
-          <div class="modal-item-label">גובה</div>
-          <div class="modal-item-value">${Math.round(p['גובה במטר']*100)} ס"מ</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">אורך</div>
-          <div class="modal-item-value">${Math.round(p['אורך במטר']*100)} ס"מ</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">עובי</div>
-          <div class="modal-item-value">${Math.round(p['עובי במטר']*100)} ס"מ</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">משקל יחידה</div>
-          <div class="modal-item-value">${fmt(p['משקל יחידה בק"ג'])} ק"ג</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">משקל לקוב</div>
-          <div class="modal-item-value">${Number(p['משקל לקוב']).toLocaleString()} ק"ג</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">משקל למשטח</div>
-          <div class="modal-item-value">${Number(p['משקל למשטח']).toLocaleString()} ק"ג</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-section">
-      <div class="modal-section-title">📦 כמויות</div>
-      <div class="modal-grid">
-        <div class="modal-item">
-          <div class="modal-item-label">כמות במשטח</div>
-          <div class="modal-item-value">${p['כמות במשטח']} יח'</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">יחידות במ"ק</div>
-          <div class="modal-item-value">${fmt(p['יחידות במ"ק'], 1)}</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">יחידות במ"ר</div>
-          <div class="modal-item-value">${fmt(p['יחידות במ"ר'], 1)}</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">יחידות בטון</div>
-          <div class="modal-item-value">${fmt(p['יחידות בטון'], 1)}</div>
-        </div>
-        <div class="modal-item">
-          <div class="modal-item-label">קוב במשטח</div>
-          <div class="modal-item-value">${fmt(p['קוב במשטח'])} מ"ק</div>
         </div>
       </div>
     </div>
@@ -1533,7 +1612,61 @@ function openModal(makat) {
           </div>
         </div>` : ''}
       </div>`;
-    })()}`;
+    })()}
+    <div class="modal-section">
+      <div class="modal-section-title">📐 מידות ומשקל</div>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <div class="modal-item-label">גובה</div>
+          <div class="modal-item-value">${Math.round(p['גובה במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">אורך</div>
+          <div class="modal-item-value">${Math.round(p['אורך במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">עובי</div>
+          <div class="modal-item-value">${Math.round(p['עובי במטר']*100)} ס"מ</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל יחידה</div>
+          <div class="modal-item-value">${fmt(p['משקל יחידה בק"ג'])} ק"ג</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל לקוב</div>
+          <div class="modal-item-value">${Number(p['משקל לקוב']).toLocaleString()} ק"ג</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">משקל למשטח</div>
+          <div class="modal-item-value">${Number(p['משקל למשטח']).toLocaleString()} ק"ג</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">📦 כמויות</div>
+      <div class="modal-grid">
+        <div class="modal-item">
+          <div class="modal-item-label">כמות במשטח</div>
+          <div class="modal-item-value">${p['כמות במשטח']} יח'</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות במ"ק</div>
+          <div class="modal-item-value">${fmt(p['יחידות במ"ק'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות במ"ר</div>
+          <div class="modal-item-value">${fmt(p['יחידות במ"ר'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">יחידות בטון</div>
+          <div class="modal-item-value">${fmt(p['יחידות בטון'], 1)}</div>
+        </div>
+        <div class="modal-item">
+          <div class="modal-item-label">קוב במשטח</div>
+          <div class="modal-item-value">${fmt(p['קוב במשטח'])} מ"ק</div>
+        </div>
+      </div>
+    </div>`;
 
   document.getElementById('modalBackdrop').classList.add('open');
 }
@@ -1564,12 +1697,92 @@ document.getElementById('clearBtn').addEventListener('click', function() {
   updateUI();
 });
 
+// Build available dimensions from current family selection
+function getAvailableDims(family) {
+  const subset = family === 'all' ? DATA : DATA.filter(p => p['תאור משפחה'] === family);
+  return {
+    thick:  [...new Set(subset.map(p => Math.round(p['עובי במטר']  * 100)))].sort((a,b)=>a-b),
+    height: [...new Set(subset.map(p => Math.round(p['גובה במטר']  * 100)))].sort((a,b)=>a-b),
+    length: [...new Set(subset.map(p => Math.round(p['אורך במטר'] * 100)))].sort((a,b)=>a-b),
+  };
+}
+
+function renderDimChips() {
+  const dims = getAvailableDims(currentFamily);
+  const groups = [
+    { dim: 'thick',  label: 'עובי:', values: dims.thick,  current: dimThick  },
+    { dim: 'height', label: 'גובה:', values: dims.height, current: dimHeight },
+    { dim: 'length', label: 'אורך:', values: dims.length, current: dimLength },
+  ];
+
+  const bar = document.querySelector('.dims-filter-inner');
+  // Remove all existing dim-filter-group and dim-sep elements (keep reset btn)
+  bar.querySelectorAll('.dim-filter-group, .dim-sep').forEach(el => el.remove());
+
+  const resetBtn = document.getElementById('dimsResetBtn');
+
+  groups.forEach((g, i) => {
+    if (i > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'dim-sep';
+      bar.insertBefore(sep, resetBtn);
+    }
+
+    const group = document.createElement('div');
+    group.className = 'dim-filter-group';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'dim-filter-label';
+    lbl.textContent = g.label;
+    group.appendChild(lbl);
+
+    // "הכל" chip
+    const allBtn = document.createElement('button');
+    allBtn.className = 'dim-chip' + (g.current === 'all' ? ' active' : '');
+    allBtn.dataset.dim = g.dim;
+    allBtn.dataset.val = 'all';
+    allBtn.textContent = 'הכל';
+    group.appendChild(allBtn);
+
+    g.values.forEach(v => {
+      const btn = document.createElement('button');
+      btn.className = 'dim-chip' + (String(g.current) === String(v) ? ' active' : '');
+      btn.dataset.dim = g.dim;
+      btn.dataset.val = String(v);
+      btn.textContent = String(v);
+      group.appendChild(btn);
+    });
+
+    bar.insertBefore(group, resetBtn);
+  });
+
+  // Re-bind click handlers on new chips
+  bar.querySelectorAll('[data-dim]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const dim = this.dataset.dim;
+      const val = this.dataset.val;
+      bar.querySelectorAll(`[data-dim="${dim}"]`).forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      if (dim === 'thick')  { dimThick  = val; }
+      if (dim === 'height') { dimHeight = val; }
+      if (dim === 'length') { dimLength = val; }
+      const anyActive = dimThick !== 'all' || dimHeight !== 'all' || dimLength !== 'all';
+      document.getElementById('dimsResetBtn').classList.toggle('visible', anyActive);
+      updateUI();
+    });
+  });
+}
+
 // Family chips
 document.querySelectorAll('[data-family]').forEach(btn => {
   btn.addEventListener('click', function() {
     document.querySelectorAll('[data-family]').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     currentFamily = this.dataset.family;
+    // Reset dim filters when family changes
+    dimThick = dimHeight = dimLength = 'all';
+    document.getElementById('dimsResetBtn').classList.remove('visible');
+    renderDimChips();
     updateUI();
   });
 });
@@ -1582,6 +1795,16 @@ document.querySelectorAll('[data-status]').forEach(btn => {
     currentStatus = this.dataset.status;
     updateUI();
   });
+});
+
+// Dimension filters — initial render handled by renderDimChips()
+// (static chips in HTML are replaced on first call)
+
+document.getElementById('dimsResetBtn').addEventListener('click', function() {
+  dimThick = dimHeight = dimLength = 'all';
+  this.classList.remove('visible');
+  renderDimChips();
+  updateUI();
 });
 
 // Sort
@@ -1822,6 +2045,7 @@ document.addEventListener('click', function(e) {
 });
 
 // Init
+renderDimChips();
 updateUI();
 </script>
 </body>
